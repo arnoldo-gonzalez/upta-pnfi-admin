@@ -1,3 +1,11 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+
+@theme {
+  --color-upta-50: #eff6ff;
+  --color-upta-100: #dbeafe;
+  --color-upta-500: #3b82f6;
+  --color-upta-600: #2563eb; /* Azul principal para botones */
+  --color-upta-700: #1d4ed8; /* Azul oscuro para hover */
+  --color-upta-900: #1e3a8a; /* Azul muy oscuro para textos o navbar */
+}
