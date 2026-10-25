@@ -42,6 +42,7 @@ class SectionController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'max_team_size' => ['required', 'integer', 'min:1'],
             'trayecto_id' => ['required', 'exists:trayectos,id'],
             'teacher_id' => ['nullable', 'exists:users,id'], 
         ]);
@@ -49,6 +50,7 @@ class SectionController extends Controller
         $section->update([
             'name' => $request->name,
             'trayecto_id' => $request->trayecto_id,
+            'max_team_size' => $request->max_team_size,
         ]);
 
         if ($request->filled('teacher_id')) {
@@ -83,12 +85,14 @@ class SectionController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'trayecto_id' => ['required', 'exists:trayectos,id'],
+            'max_team_size' => ['required', 'integer', 'min:1'],
             'teacher_id' => ['nullable', 'exists:users,id'],
         ]);
 
         $section = Section::create([
             'name' => $request->name,
             'trayecto_id' => $request->trayecto_id,
+            'max_team_size' => $request->max_team_size,
         ]);
 
         if ($request->filled('teacher_id')) {

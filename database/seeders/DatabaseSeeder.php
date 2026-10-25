@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             StatusSeeder::class,
             RoleAndUserSeeder::class,
             TrayectoSeeder::class,
+            ProjectBaseDataSeeder::class,
         ]);
     }
 }

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('sections', function (Blueprint $table) {
             $table->id();
             $table->foreignId('trayecto_id')->constrained()->cascadeOnDelete();
+            $table->integer('max_team_size')->default(3); 
             $table->string('name');
             $table->timestamps();
         });

@@ -55,4 +55,22 @@ class User extends Authenticatable
             ->withPivot('is_active')
             ->withTimestamps();
     }
+
+    // Proyectos donde este docente es tutor
+    public function tutoredProjects()
+    {
+        return $this->hasMany(Project::class, 'tutor_id');
+    }
+
+    // Evaluaciones asignadas a este docente
+    public function assignedEvaluations()
+    {
+        return $this->hasMany(ProjectEvaluation::class, 'user_id');
+    }
+
+    // Documentos subidos por este usuario
+    public function uploadedDocuments()
+    {
+        return $this->hasMany(ProjectDocument::class, 'user_id');
+    }
 }

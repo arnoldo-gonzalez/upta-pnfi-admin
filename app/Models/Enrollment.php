@@ -26,4 +26,19 @@ class Enrollment extends Model
     {
         return $this->belongsTo(Section::class);
     }
+
+    public function projectStudents()
+    {
+        return $this->hasMany(ProjectStudent::class);
+    }
+
+    public function receivedInvitations()
+    {
+        return $this->hasMany(ProjectInvitation::class, 'receiver_enrollment_id');
+    }
+
+    public function sentInvitations()
+    {
+        return $this->hasMany(ProjectInvitation::class, 'sender_enrollment_id');
+    }
 }

@@ -23,6 +23,17 @@
                     @enderror
                 </div>
 
+                <!-- Estudiantes por grupo -->
+                <div class="mb-4">
+                    <label for="max_team_size" class="block text-sm font-medium text-gray-700">{{ __('Max students for team') }}</label>
+                    <input type="number" name="max_team_size" id="max_team_size" value="{{ old('max_team_size') }}" 
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" 
+                           placeholder="1, 2, 3, ..." required>
+                    @error('max_team_size')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Trayecto -->
                 <div class="mb-6">
                     <label for="trayecto_id" class="block text-sm font-medium text-gray-700">{{ __('Trayecto') }}</label>
