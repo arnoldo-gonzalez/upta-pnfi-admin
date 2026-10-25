@@ -52,6 +52,7 @@ class User extends Authenticatable
     public function taughtSections(): BelongsToMany
     {
         return $this->belongsToMany(Section::class, 'section_teacher')
-                    ->withTimestamps();
+            ->withPivot('is_active')
+            ->withTimestamps();
     }
 }

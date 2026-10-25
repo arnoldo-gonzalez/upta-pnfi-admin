@@ -53,7 +53,7 @@
 
             <!-- 3. Menu: Usuarios -->
             @role('admin|coordinador|docente')
-            <div x-data="{ expanded: false }">
+            <div x-data="{ expanded: {{ ( request()->routeIs('students.*') || request()->routeIs('teachers.*') ) ? 'true' : 'false' }} }">
                 <button @click="expanded = !expanded" class="w-full group flex items-center justify-between px-3 py-2 text-sm font-medium text-upta-100 rounded-md hover:bg-upta-800 hover:text-white focus:outline-none">
                     <div class="flex items-center">
                         <svg class="mr-3 h-5 w-5 text-upta-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
@@ -61,15 +61,30 @@
                     </div>
                     <svg :class="{'rotate-180': expanded, 'rotate-0': !expanded}" class="h-4 w-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
+                
+                <!-- Submenú -->
                 <div x-show="expanded" x-transition class="mt-1 space-y-1 pl-10 pr-2">
-                    <a href="{{ route('students.index') }}" class="block px-3 py-2 text-sm font-medium text-upta-200 rounded-md hover:bg-upta-800 hover:text-white {{ request()->routeIs('students.*') ? 'bg-upta-800 text-white' : '' }}">
+                    <a href="{{ route('students.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md transition-colors {{ request()->routeIs('students.*') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
                         {{ __('Students') }}
                     </a>
-                    <a href="#" class="block px-3 py-2 text-sm font-medium text-upta-200 rounded-md hover:bg-upta-800 hover:text-white">
+                    
+                    <a href="{{ route('teachers.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md transition-colors {{ request()->routeIs('teachers.*') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
                         {{ __('Teachers') }}
                     </a>
                 </div>
             </div>
+            @endrole
+
+            <!-- 4. Menu: Secciones -->
+            @role('admin|coordinador')
+            <a href="{{ route('sections.index') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('sections.*') ? 'bg-upta-700 text-white' : 'text-upta-100 hover:bg-upta-800 hover:text-white' }}">
+                
+                <svg class="mr-3 h-5 w-5 text-upta-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+                
+                {{ __('Sections') }}
+            </a>
             @endrole
         </nav>
 

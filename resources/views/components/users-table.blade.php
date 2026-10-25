@@ -62,27 +62,33 @@
                         @endif
                     </td>
 
+                    <!-- Botones de Acción Dinámicos -->
                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                         @if($showApproval && $user->status_id === UserStatus::PENDING->value)
+                            <!-- Botón de Aprobar (Solo para estudiantes pendientes) -->
                             <form action="{{ route($routePrefix . '.approve', $user->id) }}" method="POST" class="inline-block">
                                 @csrf
                                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors shadow-sm">
                                     {{ __('Approve') }}
                                 </button>
                             </form>
-                            <form action="{{ route($routePrefix . '.reject', $user->id) }}" method="POST" class="inline-block">
-                                <button type="submit" class="bg-red-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors shadow-sm">
-                                    {{ __('Reject') }}
-                                </button>
-                            </form>
-                        @elseif($user->status_id === UserStatus::ACTIVE->value)
-                            <a href="#" class="text-upta-600 hover:text-upta-900 font-bold text-xs underline">
-                                {{ __('View Details') }}
-                            </a>
                         @else
-                            <span class="text-gray-400 italic text-xs">{{ __('No actions') }}</span>
+                            <!-- Botones de Editar y Eliminar -->
+                            <div class="flex items-center justify-center space-x-3">
+                                <!-- Editar -->
+                                <a href="{{ route($routePrefix . '.edit', $user->id) }}" class="text-upta-600 hover:text-upta-900 transition-colors" title="{{ __('Edit') }}">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </a>
+
+                                <x-confirm-delete 
+                                    :action="route($routePrefix . '.destroy', $user->id)" 
+                                    title="Delete Teacher"
+                                    message="Are you sure you want to delete this teacher? This action cannot be undone." 
+                                />
+                            </div>
                         @endif
                     </td>
+
                 </tr>
             @empty
                 <tr>

@@ -6,16 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+        public function up(): void
     {
         Schema::create('section_teacher', function (Blueprint $table) {
             $table->id();
-            
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('section_id')->constrained()->cascadeOnDelete();
-            $table->timestamps();
 
-            $table->unique(['user_id', 'section_id']);
+            $table->boolean('is_active')->default(true); 
+            
+            $table->timestamps();
         });
     }
 

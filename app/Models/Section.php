@@ -30,6 +30,15 @@ class Section extends Model
     public function teachers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'section_teacher')
-                    ->withTimestamps(); 
+            ->withPivot('is_active')
+            ->withTimestamps();
+    }
+
+    public function activeTeacher()
+    {
+        return $this->belongsToMany(User::class, 'section_teacher')
+                    ->wherePivot('is_active', true)
+                    ->withPivot('is_active')
+                    ->withTimestamps();
     }
 }

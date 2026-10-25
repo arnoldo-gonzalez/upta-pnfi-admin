@@ -9,6 +9,7 @@
     "Already registered?": "¿Ya estas registrado?",
     "Register": "Registro",
     "Name": "Nombre",
+    "Full Name": "Nombre completo",
     "Credential": "Cédula",
     "Phone": "Teléfono",
     "Confirm Password": "Confirmar contraseña",
@@ -75,5 +76,47 @@
     "admin": "Administrador",
     "coordinador": "Coordinador",
     "docente": "Docente",
-    "estudiante": "Estudiante"
+    "estudiante": "Estudiante",
+
+    "Sections": "Secciones",
+    "Section": "Sección",
+    "Create Section": "Crear Sección",
+    "Section Name": "Nombre de la Sección",
+    "Trayecto": "Trayecto",
+    "Select a Trayecto": "Seleccione un Trayecto",
+    "Save Section": "Guardar Sección",
+    "Section created successfully.": "Sección creada exitosamente.",
+    "Section deleted successfully.": "Sección eliminada exitosamente.",
+    "E.g., Section 3": "Ej: Sección 3",
+    "No sections found.": "No se encontraron secciones.",
+
+    "Cancel": "Cancelar",
+    "Delete": "Eliminar",
+    "Delete Section": "Eliminar Sección",
+    "Are you sure you want to delete this section? All related student enrollments will also be removed.": "¿Estás seguro de que deseas eliminar esta sección? También se eliminarán todas las inscripciones de estudiantes relacionadas.",
+
+    "Advisor (Teacher)": "Asesor (Docente)",
+    "Select an Advisor (Optional)": "Seleccione un Asesor (Opcional)",
+    "Select an Advisor": "Seleccione un Asesor",
+    "No advisor assigned": "Sin asesor asignado",
+
+    "Edit Teacher": "Editar Docente",
+    "Update Teacher": "Actualizar Docente",
+    "New Password (Optional)": "Nueva Contraseña (Opcional)",
+    "Leave blank if you do not want to change the current password.": "Deje en blanco si no desea cambiar la contraseña actual.",
+    "Delete Teacher": "Eliminar Docente",
+    "Are you sure you want to delete this teacher? This action cannot be undone.": "¿Estás seguro de que deseas eliminar a este docente? Esta acción no se puede deshacer.",
+    "Teacher updated successfully.": "Docente actualizado exitosamente.",
+    "Teacher deleted successfully.": "Docente eliminado exitosamente.",
+
+    "Edit Student": "Editar Estudiante",
+    "Update Student": "Actualizar Estudiante",
+    "Student updated successfully.": "Estudiante actualizado exitosamente.",
+    "Student deleted successfully.": "Estudiante eliminado exitosamente.",
+    "Delete Student": "Eliminar Estudiante",
+    "Are you sure you want to delete this student? This action cannot be undone.": "¿Estás seguro de que deseas eliminar a este estudiante? Esta acción no se puede deshacer.",
+
+    "Teacher Report": "Reporte de docentes",
+    "Teacher": "Docente",
+    "Create Teacher": "Crear Docente"
 }
