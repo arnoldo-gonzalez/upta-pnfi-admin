@@ -10,13 +10,6 @@
             </a>
         </div>
 
-        <!-- Mensaje de éxito -->
-        @if (session('success'))
-            <div class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded shadow-sm">
-                {{ session('success') }}
-            </div>
-        @endif
-
         <!-- Tabla -->
         <div class="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
             <table class="min-w-full divide-y divide-gray-200">

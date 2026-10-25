@@ -7,6 +7,7 @@ enum UserStatus: int
     case PENDING  = 1;
     case ACTIVE   = 2;
     case REJECTED = 3;
+    case DRAFT    = 4;
 
     public function label(): string
     {
@@ -14,6 +15,7 @@ enum UserStatus: int
             self::PENDING  => 'Pendiente',
             self::ACTIVE   => 'Activo',
             self::REJECTED => 'Rechazado',
+            self::DRAFT    => 'Borrador',
         };
     }
 }

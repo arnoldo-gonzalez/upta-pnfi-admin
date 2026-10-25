@@ -8,18 +8,6 @@
             </button>
         </div>
 
-        @if (session('success'))
-            <div class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded shadow-sm">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded shadow-sm">
-                {{ session('error') }}
-            </div>
-        @endif
-
         <div class="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden">
             <!-- Pasamos variables en inglés: $students -->
             <x-users-table 

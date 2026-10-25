@@ -29,9 +29,9 @@ class ProjectBaseDataSeeder extends Seeder
         InvestigationLine::firstOrCreate(['name' => 'Software Educativo']);
 
         // 4. Estados de la solicitud de tutoría
-        TutorRequestStatus::firstOrCreate(['name' => 'sin_solicitud']);
-        TutorRequestStatus::firstOrCreate(['name' => 'pendiente']);
-        TutorRequestStatus::firstOrCreate(['name' => 'aceptada']);
-        TutorRequestStatus::firstOrCreate(['name' => 'rechazada']);
+        TutorRequestStatus::firstOrCreate(['id' => 1, 'name' => 'sin_solicitud']);
+        TutorRequestStatus::firstOrCreate(['id' => 2, 'name' => 'pendiente']);
+        TutorRequestStatus::firstOrCreate(['id' => 3, 'name' => 'aceptada']);
+        TutorRequestStatus::firstOrCreate(['id' => 4, 'name' => 'rechazada']);
     }
 }

@@ -53,17 +53,28 @@ class SectionController extends Controller
             'max_team_size' => $request->max_team_size,
         ]);
 
+        // Si se seleccionó un docente, verificamos si es diferente al actual
         if ($request->filled('teacher_id')) {
             
-            $activeTeacherIds = $section->teachers()->wherePivot('is_active', true)->pluck('users.id')->toArray();
-            
-            if (!empty($activeTeacherIds)) {
-                $section->teachers()->updateExistingPivot($activeTeacherIds, ['is_active' => false]);
-            }
+            // Buscamos quién es el docente activo actualmente
+            $currentActiveTeacher = $section->teachers()->wherePivot('is_active', true)->first();
 
-            $section->teachers()->syncWithoutDetaching([
-                $request->teacher_id => ['is_active' => true]
-            ]);
+            // Solo hacemos el cambio si el docente seleccionado es distinto al actual
+            if (!$currentActiveTeacher || $currentActiveTeacher->id !== $request->teacher_id) {
+                
+                // 1. Desactivamos a TODOS los docentes que estén activos en esta sección
+                $section->teachers()->updateExistingPivot(
+                    $section->teachers()->wherePivot('is_active', true)->pluck('users.id')->toArray(),
+                    ['is_active' => false]
+                );
+
+                // 2. Usamos attach() para crear un NUEVO registro histórico (nuevo ID)
+                $section->teachers()->attach($request->teacher_id, [
+                    'is_active' => true
+                ]);
+                
+            }
+            
         }
 
         return redirect()->route('sections.index')->with('success', __('Section updated successfully.'));

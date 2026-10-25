@@ -1,3 +1,5 @@
+@use('App\Models\Trayecto')
+
 <x-guest-layout>
 
     <x-heading class="text-white text-center" level="h2">{{ __("Register now!") }}</x-heading>
@@ -17,6 +19,23 @@
             <x-input-label for="email" :value="__('Email')" />
             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <x-input-label for="section_id" :value="__('Section')" />
+            <select name="section_id" id="section_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                <option value="">{{ __('Select your section') }}</option>
+                @foreach(Trayecto::with('sections')->get() as $trayecto)
+                    <optgroup label="{{ $trayecto->name }}">
+                        @foreach($trayecto->sections as $section)
+                            <option value="{{ $section->id }}" {{ old('section_id') == $section->id ? 'selected' : '' }}>
+                                {{ $section->name }}
+                            </option>
+                        @endforeach
+                    </optgroup>
+                @endforeach
+            </select>
+            <x-input-error :messages="$errors->get('section_id')" class="mt-2" />
         </div>
 
         <div class="flex gap-[10px]">

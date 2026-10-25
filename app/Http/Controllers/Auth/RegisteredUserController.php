@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Enrollment;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -33,27 +34,32 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'credential' => ['required', 'numeric', 'digits_between:6,9', 'unique:users,credential'],
-            'phone' => ['required', 'numeric', 'digits_between:10,11'], // Sin unique
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'credential' => ['required', 'numeric', 'digits_between:6,9', 'unique:'.User::class],
+            'phone' => ['required', 'numeric', 'digits_between:10,11'],
+            'section_id' => ['required', 'exists:sections,id'], 
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-
+            'password' => Hash::make($request->password),
             'credential' => $request->credential,
             'phone' => $request->phone,
-
-            'password' => Hash::make($request->password),
-
-            'status_id' => UserStatus::PENDING->value
+            'status_id' => UserStatus::PENDING->value,
         ]);
 
-        $user->assignRole("estudiante");
+        $user->assignRole('estudiante');
+
+        // CREAR LA INSCRIPCIÓN (ENROLLMENT)
+        Enrollment::create([
+            'user_id' => $user->id,
+            'section_id' => $request->section_id,
+            'is_active' => true,
+        ]);
 
         event(new Registered($user));
 
-        return redirect()->route('login')->with('status', 'Tu cuenta ha sido creada. Por favor, espera a que tu asesor académico apruebe tu registro para poder ingresar.');
+        return redirect()->route('login')->with('status', 'Tu cuenta ha sido creada. Por favor, espera a que tu asesor apruebe tu registro para poder ingresar.');
     }
 }

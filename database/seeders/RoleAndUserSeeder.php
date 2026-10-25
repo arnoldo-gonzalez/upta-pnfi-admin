@@ -3,6 +3,9 @@
 namespace Database\Seeders;
 
 use App\Enums\UserStatus;
+use App\Models\Enrollment;
+use App\Models\Section;
+use App\Models\Trayecto;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use App\Models\User;
@@ -35,7 +38,7 @@ class RoleAndUserSeeder extends Seeder
             [
                 'name' => 'Admin Sistema',
                 'password' => Hash::make('password'),
-                'credential' => '00000001',
+                'credential' => '10000001',
                 'phone' => '04140000001',
                 'status_id' => UserStatus::ACTIVE->value,
             ]
@@ -48,7 +51,7 @@ class RoleAndUserSeeder extends Seeder
             [
                 'name' => 'Coordinador PNFI',
                 'password' => Hash::make('password'),
-                'credential' => '00000002',
+                'credential' => '20000002',
                 'phone' => '04140000002',
                 'status_id' => UserStatus::ACTIVE->value,
             ]
@@ -61,7 +64,7 @@ class RoleAndUserSeeder extends Seeder
             [
                 'name' => 'Docente Tutor',
                 'password' => Hash::make('password'),
-                'credential' => '00000003',
+                'credential' => '20000003',
                 'phone' => '04140000003',
                 'status_id' => UserStatus::ACTIVE->value,
             ]
@@ -69,16 +72,37 @@ class RoleAndUserSeeder extends Seeder
         $docente->assignRole($docenteRole);
 
         // --- ESTUDIANTE ---
-        $estudiante = User::firstOrCreate(
-            ['email' => 'estudiante@uptamcy.com'],
-            [
-                'name' => 'Estudiante Prueba',
-                'password' => Hash::make('password'),
-                'credential' => '30000001',
-                'phone' => '04140000004',
-                'status_id' => UserStatus::PENDING->value,
-            ]
-        );
-        $estudiante->assignRole($estudianteRole);
+
+        for ($i = 0; $i <= 10; $i++) {
+
+            $estudiante = User::firstOrCreate(
+                ['email' => "estudiante_$i@uptamcy.com"],
+                [
+                    'name' => "Estudiante Prueba $i",
+                    'password' => Hash::make('password'),
+                    'credential' => 3000000 + $i,
+                    'phone' => '0' . (4140000004 + $i),
+                    'status_id' => UserStatus::PENDING->value,
+                ]
+            );
+            $estudiante->assignRole($estudianteRole);
+    
+            // --- INSCRIPCIÓN DEL ESTUDIANTE DE PRUEBA ---
+            
+            $trayecto = Trayecto::firstOrCreate(['number' => 2], ['name' => 'Trayecto 2']);
+            $seccion = Section::firstOrCreate(
+                ['name' => 'Sección 1', 'trayecto_id' => $trayecto->id]
+            );
+    
+            Enrollment::firstOrCreate([
+                'user_id' => $estudiante->id,
+                'section_id' => $seccion->id,
+            ], [
+                'is_active' => true,
+                'completed_at' => null,
+            ]);
+
+        }
+
     }
 }
