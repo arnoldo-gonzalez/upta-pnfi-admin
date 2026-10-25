@@ -1,4 +1,7 @@
 <x-guest-layout>
+
+    <x-heading class="text-white text-center" level="h2">{{ __("Register now!") }}</x-heading>
+    
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
@@ -16,19 +19,24 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Credential -->
-        <div class="mt-4">
-            <x-input-label for="credential" :value="__('Credential')" />
-            <x-text-input id="credential" class="block mt-1 w-full" type="number" name="credential" :value="old('credential')" required />
-            <x-input-error :messages="$errors->get('credential')" class="mt-2" />
+        <div class="flex gap-[10px]">
+
+            <!-- Credential -->
+            <div class="mt-4">
+                <x-input-label for="credential" :value="__('Credential')" />
+                <x-text-input id="credential" class="block mt-1 max-w-[160px]" type="number" name="credential" :value="old('credential')" required />
+                <x-input-error :messages="$errors->get('credential')" class="mt-2" />
+            </div>
+    
+            <!-- Phone number -->
+            <div class="mt-4">
+                <x-input-label for="phone" :value="__('Phone')" />
+                <x-text-input id="phone" class="block mt-1 max-w-[160px]" type="number" name="phone" :value="old('phone')" required />
+                <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+            </div>
+
         </div>
 
-        <!-- Phone number -->
-        <div class="mt-4">
-            <x-input-label for="phone" :value="__('Phone')" />
-            <x-text-input id="phone" class="block mt-1 w-full" type="number" name="phone" :value="old('phone')" required />
-            <x-input-error :messages="$errors->get('phone')" class="mt-2" />
-        </div>
 
         <!-- Password -->
         <div class="mt-4">
@@ -53,7 +61,7 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
+        <div class="flex items-center justify-between mt-4">
             <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
                 {{ __('Already registered?') }}
             </a>

@@ -2,6 +2,8 @@
     "E-Mail Address": "Correo electrónico",
     "Password": "Contraseña",
     "Remember Me": "Recuérdame",
+    "Welcome back!": "¡Bienvenido!",
+    "Register now!": "¡Registrate ahora!",
     "Log in": "Acceder",
     "Forgot Your Password?": "¿Olvidaste tu contraseña?",
     "Already registered?": "¿Ya estas registrado?",
@@ -36,5 +38,42 @@
 
     "Are you a student and don't have an account?": "¿Eres estudiante y aún no tienes una cuenta?",
     "Register to await approval": "Registrarme para esperar aprobación",
-    "* Your account will require approval from the advisor before you can access the system.": "* Tu cuenta requerirá la aprobación de el asesor antes de poder acceder al sistema."
+    "* Your account will require approval from the advisor before you can access the system.": "* Tu cuenta requerirá la aprobación de el asesor antes de poder acceder al sistema.",
+
+    "Student Report": "Reporte de Estudiantes",
+    "Export PDF": "Exportar PDF",
+    "The selected user is not a student.": "El usuario seleccionado no es un estudiante.",
+
+    "The student :name has been successfully approved.": "El estudiante :name ha sido aprobado exitosamente.",
+    "The student :name has been successfully rejected.": "El estudiante :name ha sido rechazado exitosamente.",
+
+    "Student": "Estudiante",
+    "ID Number": "Cédula",
+    "Contact": "Contacto",
+    "Status": "Estado",
+    "Actions": "Acciones",
+    "Pending": "Pendiente",
+    "Active": "Activo",
+    "Rejected": "Rechazado",
+    "Reject": "Rechazar",
+    "Approve": "Aprobar",
+    "View Details": "Ver Detalles",
+    "No actions": "Sin acciones",
+    "No records found for this role.": "No se encontraron registros para este rol.",
+
+    "Dashboard": "Panel Principal",
+    "Academic Management": "Gestión Académica",
+    "Protocols": "Protocolos",
+    "Registrations": "Inscripciones",
+    "Tutorials": "Tutorías",
+    "Users": "Usuarios",
+    "Students": "Estudiantes",
+    "Teachers": "Docentes",
+    "My Profile": "Mi Perfil",
+    "Log Out": "Cerrar Sesión",
+    "User": "Usuario",
+    "admin": "Administrador",
+    "coordinador": "Coordinador",
+    "docente": "Docente",
+    "estudiante": "Estudiante"
 }

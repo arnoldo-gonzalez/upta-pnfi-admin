@@ -1,4 +1,7 @@
 <x-guest-layout>
+
+    <x-heading class="text-white text-center" level="h2">{{ __("Welcome back!") }}</x-heading>
+
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 

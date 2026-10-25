@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserStatus;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use App\Models\User;
@@ -26,38 +27,58 @@ class RoleAndUserSeeder extends Seeder
         // 1.4 Estudiante, es quien cursa la materia.
         $estudianteRole = Role::firstOrCreate(['name' => 'estudiante']);
 
-
         // 2. Crear un usuario de prueba por cada rol
-        $admin = User::firstOrCreate([
-            'name' => 'Admin Sistema',
-            'email' => 'admin@uptamcy.com',
-            'password' => Hash::make('password'),
-        ]);
 
+        // --- ADMIN ---
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@uptamcy.com'],
+            [
+                'name' => 'Admin Sistema',
+                'password' => Hash::make('password'),
+                'credential' => '00000001',
+                'phone' => '04140000001',
+                'status_id' => UserStatus::ACTIVE->value,
+            ]
+        );
         $admin->assignRole($adminRole);
 
-        $coordinador = User::firstOrCreate([
-            'name' => 'Coordinador PNFI',
-            'email' => 'coordinador@uptamcy.com',
-            'password' => Hash::make('password'),
-        ]);
-
+        // --- COORDINADOR ---
+        $coordinador = User::firstOrCreate(
+            ['email' => 'coordinador@uptamcy.com'],
+            [
+                'name' => 'Coordinador PNFI',
+                'password' => Hash::make('password'),
+                'credential' => '00000002',
+                'phone' => '04140000002',
+                'status_id' => UserStatus::ACTIVE->value,
+            ]
+        );
         $coordinador->assignRole($coordinadorRole);
 
-        $docente = User::firstOrCreate([
-            'name' => 'Docente Tutor',
-            'email' => 'docente@uptamcy.com',
-            'password' => Hash::make('password'),
-        ]);
-
+        // --- DOCENTE ---
+        $docente = User::firstOrCreate(
+            ['email' => 'docente@uptamcy.com'],
+            [
+                'name' => 'Docente Tutor',
+                'password' => Hash::make('password'),
+                'credential' => '00000003',
+                'phone' => '04140000003',
+                'status_id' => UserStatus::ACTIVE->value,
+            ]
+        );
         $docente->assignRole($docenteRole);
 
-        $estudiante = User::firstOrCreate([
-            'name' => 'Estudiante Prueba',
-            'email' => 'estudiante@uptamcy.com',
-            'password' => Hash::make('password'),
-        ]);
-
+        // --- ESTUDIANTE ---
+        $estudiante = User::firstOrCreate(
+            ['email' => 'estudiante@uptamcy.com'],
+            [
+                'name' => 'Estudiante Prueba',
+                'password' => Hash::make('password'),
+                'credential' => '30000001',
+                'phone' => '04140000004',
+                'status_id' => UserStatus::PENDING->value,
+            ]
+        );
         $estudiante->assignRole($estudianteRole);
     }
 }

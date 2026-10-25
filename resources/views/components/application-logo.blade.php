@@ -1,1 +1,1 @@
-<img src="{{ asset("images/logo_upta.png") }}" alt="Logo de la UPTA" class="max-w-[250px] max-h-[250px]" />
+<img src="{{ asset("images/logo_upta.png") }}" alt="Logo de la UPTA" {{ $attributes }} />
