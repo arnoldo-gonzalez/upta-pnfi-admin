@@ -17,17 +17,17 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex gap-4 border sm:justify-center items-center pt-6 sm:pt-0 bg-upta-100 dark:bg-upta-900">
+        <div class="min-h-screen flex gap-4 border sm:justify-center items-center p-6 bg-upta-100 dark:bg-upta-900">
 
-            <div class="flex">
+            <div class="flex md:flex-row flex-col justify-center">
 
-                <div class="rounded-l-md bg-white p-[10px] flex items-center justify-center">
+                <div class="w-full sm:max-w-md rounded-t-md md:rounded-l-md bg-white p-[10px] flex items-center justify-center">
                     <a href="/">
-                        <x-application-logo class="w-[350px] h-[350px] max-w-[350px] max-h-[350px] text-gray-500" />
+                        <x-application-logo class="max-w-[183px] max-h-[183px] w-[183px] h-[183px] md:w-[350px] md:h-[350px] md:max-w-[350px] md:max-h-[350px] text-gray-500" />
                     </a>
                 </div>
     
-                <div class="w-full sm:max-w-md px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
+                <div class="w-full sm:max-w-md px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden rounded-b-md md:rounded-lg">
                     {{ $slot }}
                 </div>
 
