@@ -171,5 +171,13 @@
     "Sent by:": "Enviada por:",
     "Team is full.": "El equipo está completo.",
     "You have reached the maximum number of members and pending invitations.": "Has alcanzado el número máximo de miembros e invitaciones pendientes.",
-    "The team has reached the maximum limit of members and pending invitations for this section.": "El equipo ha alcanzado el límite máximo de miembros e invitaciones pendientes para esta sección."
+    "The team has reached the maximum limit of members and pending invitations for this section.": "El equipo ha alcanzado el límite máximo de miembros e invitaciones pendientes para esta sección.",
+
+    "This project has already been submitted.": "Este proyecto ya ha sido enviado.",
+    "Once your team is ready, upload your protocol PDF. This will block further team changes.": "Una vez que tu equipo esté listo, sube el PDF de tu protocolo. Esto bloqueará futuros cambios en el equipo.",
+    "Submit and Lock Team": "Enviar y Bloquear Equipo",
+    "Your Protocol": "Tu Protocolo",
+    "Protocol Document": "Documento del Protocolo",
+    "Download / View PDF": "Descargar / Ver PDF",
+    "Protocol submitted successfully. Your project is now in review.": "Protocolo enviado exitosamente. Tu proyecto está ahora en revisión."
 }

@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Enums\TutorRequestStatus;
 use App\Enums\UserStatus;
+use App\Models\DocumentType;
 use App\Models\Project;
 use App\Models\ProjectStudent;
 use App\Models\InvestigationLine;
 use App\Models\ProjectInvitation;
 use App\Models\Enrollment;
+use App\Models\ProjectDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -112,5 +114,43 @@ class ProjectController extends Controller
         });
 
         return redirect()->route('projects.index')->with('success', __('Project created. Now invite your team members.'));
+    }
+
+    public function submitProtocol(Request $request, Project $project)
+    {
+        // 1. Validar que sea un PDF y no pase de 10MB
+        $request->validate([
+            'protocol_file' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+        ]);
+
+        // 2. Seguridad: Evitar que se envíe dos veces
+        if ($project->status_id !== UserStatus::DRAFT->value) {
+            return back()->with('error', __('This project has already been submitted.'));
+        }
+
+        // 3. Procesar el envío
+        DB::transaction(function () use ($request, $project) {
+            
+            // Guardar el archivo en storage/app/public/projects/{id}
+            $path = $request->file('protocol_file')->store('projects/' . $project->id, 'public');
+
+            // Buscar el tipo de documento 'Protocolo'
+            $protocolType = DocumentType::where('name', 'Protocolo')->first();
+
+            // Registrar el archivo en la base de datos
+            ProjectDocument::create([
+                'project_id' => $project->id,
+                'document_type_id' => $protocolType->id,
+                'user_id' => auth()->id(),
+                'file_path' => $path,
+            ]);
+
+            // Cambiar el estado a "Pendiente / En Revisión"
+            $project->update([
+                'status_id' => UserStatus::PENDING->value
+            ]);
+        });
+
+        return redirect()->route('projects.index')->with('success', __('Protocol submitted successfully. Your project is now in review.'));
     }
 }

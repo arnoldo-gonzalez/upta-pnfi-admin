@@ -85,8 +85,51 @@
                         $totalOccupied = count($teamMembers) + $pendingCount;
                         $hasSpace = $totalOccupied < $project->section->max_team_size;
                     @endphp
+
+                    <!-- 1. FORMULARIO DE SUBIDA (Solo en Borrador) -->
+                    @if($project->status_id === UserStatus::DRAFT->value)
+                        <div class="bg-upta-50 border border-upta-200 shadow-md rounded-lg p-6">
+                            <h3 class="text-sm font-bold text-upta-900 mb-3 uppercase tracking-wider">{{ __('Submit Protocol') }}</h3>
+                            <p class="text-xs text-upta-700 mb-4">{{ __('Once your team is ready, upload your protocol PDF. This will block further team changes.') }}</p>
+                            
+                            <form action="{{ route('projects.submitProtocol', $project) }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="mb-3">
+                                    <input type="file" name="protocol_file" accept=".pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-upta-600 file:text-white hover:file:bg-upta-700" required>
+                                    @error('protocol_file') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                                </div>
+                                <button type="submit" class="w-full bg-upta-600 text-white text-sm font-semibold px-4 py-2 rounded hover:bg-upta-700 transition shadow-sm">
+                                    {{ __('Submit and Lock Team') }}
+                                </button>
+                            </form>
+                        </div>
+                    @endif
+
+                    <!-- 2. VER DOCUMENTO (Si ya fue enviado) -->
+                    @if($project->status_id === UserStatus::PENDING->value)
+                        @php
+                            $protocolDoc = $project->documents()->whereHas('type', function($q) {
+                                $q->where('name', 'Protocolo');
+                            })->first();
+                        @endphp
+                        
+                        @if($protocolDoc)
+                            <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6">
+                                <h3 class="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{{ __('Your Protocol') }}</h3>
+                                <div class="flex items-center p-3 bg-gray-50 rounded border border-gray-200">
+                                    <svg class="h-8 w-8 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-gray-900">{{ __('Protocol Document') }}</p>
+                                        <a href="{{ asset('storage/' . $protocolDoc->file_path) }}" target="_blank" class="text-xs text-upta-600 hover:underline">
+                                            {{ __('Download / View PDF') }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    @endif
                     
-                    <!-- Invitar Estudiantes -->
+                    <!-- 3. Invitar Estudiantes -->
                     @if($project->status_id === UserStatus::DRAFT->value && $hasSpace)
                         <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6">
                             <h3 class="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{{ __('Invite Classmates') }}</h3>
@@ -157,7 +200,7 @@
                         </div>
                     @endif
 
-                    <!-- Invitaciones Enviadas -->
+                    <!-- 4. Invitaciones Enviadas -->
                     @if(count($sentInvitations) > 0)
                         <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6">
                             <h3 class="text-lg font-bold text-gray-800 mb-4">{{ __('Sent Invitations') }}</h3>
