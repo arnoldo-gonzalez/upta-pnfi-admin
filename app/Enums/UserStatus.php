@@ -8,6 +8,7 @@ enum UserStatus: int
     case ACTIVE   = 2;
     case REJECTED = 3;
     case DRAFT    = 4;
+    case NEEDS_CORRECTIONS = 5;
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum UserStatus: int
             self::ACTIVE   => 'Activo',
             self::REJECTED => 'Rechazado',
             self::DRAFT    => 'Borrador',
+            self::NEEDS_CORRECTIONS => 'Necesita correcciones',
         };
     }
 }

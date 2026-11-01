@@ -10,14 +10,28 @@ use App\Models\ProjectStudent;
 use App\Models\InvestigationLine;
 use App\Models\ProjectInvitation;
 use App\Models\Enrollment;
+use App\Models\EvaluationStage;
 use App\Models\ProjectDocument;
+use App\Models\ProjectEvaluation;
+use App\Models\User;
+use App\Notifications\EvaluatorAssigned;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use ZipArchive;
 
 class ProjectController extends Controller
 {
     public function index() {
-        $enrollment = auth()->user()->enrollments()->where('is_active', true)->first();
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        // 1. Verificar si el usuario es estudiante. Si no lo es, redirigir silenciosamente.
+        if (!$user->hasRole('estudiante')) {
+            return redirect()->route('dashboard');
+        }
+
+        // 2. Si es estudiante, verificar su inscripción
+        $enrollment = $user->enrollments()->where('is_active', true)->first();
 
         if (!$enrollment) {
             return redirect()->route('dashboard')->with('error', __('You do not have an active enrollment.'));
@@ -118,39 +132,98 @@ class ProjectController extends Controller
 
     public function submitProtocol(Request $request, Project $project)
     {
-        // 1. Validar que sea un PDF y no pase de 10MB
         $request->validate([
             'protocol_file' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
-        // 2. Seguridad: Evitar que se envíe dos veces
-        if ($project->status_id !== UserStatus::DRAFT->value) {
-            return back()->with('error', __('This project has already been submitted.'));
+        if (!in_array($project->status_id, [UserStatus::DRAFT->value, UserStatus::NEEDS_CORRECTIONS->value])) {
+            return back()->with('error', __('This project cannot be submitted at this time.'));
         }
 
-        // 3. Procesar el envío
         DB::transaction(function () use ($request, $project) {
             
-            // Guardar el archivo en storage/app/public/projects/{id}
-            $path = $request->file('protocol_file')->store('projects/' . $project->id, 'public');
+            $file = $request->file('protocol_file');
+            $originalName = $file->getClientOriginalName();
+            $fileName = time() . '_' . pathinfo($originalName, PATHINFO_FILENAME) . '.zip';
+            
+            // 1. Guardar el archivo original temporalmente
+            $tempPath = $file->storeAs('temp', $originalName, 'local');
+            $absoluteTempPath = storage_path('app/private/' . $tempPath);
 
-            // Buscar el tipo de documento 'Protocolo'
+            // 2. Comprimir con ZipArchive
+            $zipPath = 'projects/' . $project->id . '/' . $fileName;
+            $absoluteZipPath = storage_path('app/public/' . $zipPath);
+            
+            // Asegurar que la carpeta exista
+            if (!file_exists(dirname($absoluteZipPath))) {
+                mkdir(dirname($absoluteZipPath), 0755, true);
+            }
+
+            $zip = new ZipArchive;
+            if ($zip->open($absoluteZipPath, ZipArchive::CREATE) === TRUE) {
+                $zip->addFile($absoluteTempPath, $originalName);
+                $zip->close();
+            }
+
+            // 3. Eliminar el archivo temporal original
+            unlink($absoluteTempPath);
+
+            // 4. Registrar en base de datos
             $protocolType = DocumentType::where('name', 'Protocolo')->first();
 
-            // Registrar el archivo en la base de datos
-            ProjectDocument::create([
+            $submissionCount = ProjectDocument::where('project_id', $project->id)
+                ->where('document_type_id', $protocolType->id)
+                ->count() + 1;
+
+            $document = ProjectDocument::create([
                 'project_id' => $project->id,
                 'document_type_id' => $protocolType->id,
                 'user_id' => auth()->id(),
-                'file_path' => $path,
+                'file_path' => $zipPath,
+                'submission_number' => $submissionCount, // <-- Guardamos el número
             ]);
 
-            // Cambiar el estado a "Pendiente / En Revisión"
-            $project->update([
-                'status_id' => UserStatus::PENDING->value
-            ]);
+            // 5. Cambiar el estado a Pendiente y REINICIAR EVALUACIONES
+            $project->update(['status_id' => UserStatus::PENDING->value]);
+            
+            // Si es una reentrega, reseteamos a los mismos evaluadores
+            $this->createNewEvaluationsForSubmission($project, $document);
         });
 
         return redirect()->route('projects.index')->with('success', __('Protocol submitted successfully. Your project is now in review.'));
+    }
+
+    private function createNewEvaluationsForSubmission(Project $project, ProjectDocument $newDocument) {
+        $protocolStage = EvaluationStage::where('name', 'Protocolo')->first();
+
+        // 1. Buscamos si ya existían evaluadores asignados en envíos anteriores
+        $previousEvaluators = ProjectEvaluation::where('project_id', $project->id)
+            ->where('stage_id', $protocolStage->id)
+            ->pluck('user_id')
+            ->unique();
+
+        // 2. Si es la primera vez (no hay evaluadores previos), no hacemos nada.
+        // El coordinador tendrá que asignarlos.
+        if ($previousEvaluators->isEmpty()) {
+            return;
+        }
+
+        // 3. Si ya existían (es un reenvío), creamos NUEVOS registros para el nuevo documento
+        foreach ($previousEvaluators as $teacherId) {
+            ProjectEvaluation::create([
+                'project_id' => $project->id,
+                'user_id' => $teacherId,
+                'stage_id' => $protocolStage->id,
+                'project_document_id' => $newDocument->id,
+                'status_id' => UserStatus::PENDING->value,
+                'observations' => null,
+            ]);
+
+            // Notificamos al docente que tiene una nueva versión por revisar
+            $teacher = User::find($teacherId);
+            if ($teacher) {
+                $teacher->notify(new EvaluatorAssigned($project));
+            }
+        }
     }
 }

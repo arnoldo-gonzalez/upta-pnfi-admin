@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['project_id', 'document_type_id', 'user_id', 'file_path'])]
+#[Fillable(['project_id', 'document_type_id', 'user_id', 'file_path', 'submission_number'])]
 class ProjectDocument extends Model
 {
     use HasFactory;

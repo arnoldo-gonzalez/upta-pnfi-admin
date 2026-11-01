@@ -33,7 +33,7 @@
             @endrole
 
             <!-- 2. Menu: Gestión Académica -->
-            @role('admin|coordinador|docente')
+            @role('admin|coordinador')
             <div x-data="{ expanded: false }">
                 <button @click="expanded = !expanded" class="w-full group flex items-center justify-between px-3 py-2 text-sm font-medium text-upta-100 rounded-md hover:bg-upta-800 hover:text-white focus:outline-none">
                     <div class="flex items-center">
@@ -53,6 +53,30 @@
                     </a>
                     <a href="#" class="block px-3 py-2 text-sm font-medium text-upta-200 rounded-md hover:bg-upta-800 hover:text-white">
                         {{ __('Tutorials') }}
+                    </a>
+                    <a href="{{ route('evaluations.coordinator.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('evaluations.coordinator.*') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
+                        {{ __('Evaluations') }}
+                    </a>
+                </div>
+            </div>
+            @endrole
+
+            @role('docente')
+            <div x-data="{ expanded: {{ request()->routeIs('evaluations.teacher.*') ? 'true' : 'false' }} }">
+                <button @click="expanded = !expanded" class="w-full group flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('evaluations.teacher.*') ? 'bg-upta-700 text-white' : 'text-upta-100 hover:bg-upta-800 hover:text-white' }} focus:outline-none">
+                    <div class="flex items-center">
+                        <svg class="mr-3 h-5 w-5 text-upta-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                        {{ __('Evaluations') }}
+                    </div>
+                    <svg :class="{'rotate-180': expanded, 'rotate-0': !expanded}" class="h-4 w-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+
+                <div x-show="expanded" x-transition class="mt-1 space-y-1 pl-10 pr-2">
+                    <a href="{{ route('evaluations.teacher.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('evaluations.teacher.index') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
+                        {{ __('Pending') }}
+                    </a>
+                    <a href="{{ route('evaluations.teacher.history') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('evaluations.teacher.history*') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
+                        {{ __('History') }}
                     </a>
                 </div>
             </div>
@@ -74,10 +98,13 @@
                     <a href="{{ route('students.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md transition-colors {{ request()->routeIs('students.*') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
                         {{ __('Students') }}
                     </a>
-                    
+
+                    @role('admin|coordinador')
                     <a href="{{ route('teachers.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md transition-colors {{ request()->routeIs('teachers.*') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
                         {{ __('Teachers') }}
                     </a>
+                    @endrole
+
                 </div>
             </div>
             @endrole
@@ -94,6 +121,63 @@
             </a>
             @endrole
         </nav>
+
+        <!-- Campana de Notificaciones -->
+        @php
+            $unreadNotifications = auth()->user()->unreadNotifications;
+        @endphp
+        
+        <div class="relative" x-data="{ openNotifications: false }">
+            <!-- Botón de la campana -->
+            <button @click="openNotifications = !openNotifications" class="relative p-2 text-upta-200 hover:text-white focus:outline-none transition-colors">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                </svg>
+
+                @if($unreadNotifications->count() > 0)
+                    <span class="absolute top-1 right-1 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-upta-900"></span>
+                @endif
+            </button>
+        
+            <!-- Menú Desplegable -->
+            <div x-show="openNotifications" @click.away="openNotifications = false" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 translate-y-2"
+                 class="absolute left-0 bottom-full mb-2 w-72 bg-white rounded-lg shadow-xl z-50 border border-gray-100 overflow-hidden" 
+                 style="display: none;">
+
+                <!-- Cabecera del menú -->
+                <div class="p-3 bg-gray-50 border-b flex justify-between items-center">
+                    <span class="font-bold text-xs text-gray-600 uppercase tracking-wider">{{ __('Notifications') }}</span>
+
+                    <!-- Botón para marcar todas como leídas -->
+                    @if($unreadNotifications->count() > 0)
+                        <form action="{{ route('notifications.markAllRead') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="text-xs text-upta-600 hover:text-upta-800 hover:underline font-medium">
+                                {{ __('Mark all as read') }}
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            
+                <!-- Lista de notificaciones -->
+                <div class="max-h-64 overflow-y-auto">
+                    @forelse($unreadNotifications as $notification)
+                        <a href="{{ route('notifications.read', $notification->id) }}" class="block p-4 border-b hover:bg-gray-50 transition-colors">
+                            <p class="text-sm font-bold text-gray-800">{{ $notification->data['title'] }}</p>
+                            <p class="text-xs text-gray-600 mt-1 line-clamp-2">{{ $notification->data['message'] }}</p>
+                        </a>
+                    @empty
+                        <p class="p-4 text-sm text-gray-500 text-center">{{ __('No new notifications') }}</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
 
         <!-- Perfil de usuario -->
         <div class="border-t border-upta-700 p-4 relative" x-data="{ profileOpen: false }">

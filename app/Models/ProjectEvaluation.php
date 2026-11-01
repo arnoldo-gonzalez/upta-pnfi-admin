@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['project_id', 'user_id', 'stage_id', 'status_id', 'observations', 'evaluated_at'])]
+#[Fillable(['project_id', 'user_id', 'stage_id', 'status_id', 'observations', 'evaluated_at', 'project_document_id'])]
 class ProjectEvaluation extends Model
 {
     use HasFactory;
@@ -28,6 +28,11 @@ class ProjectEvaluation extends Model
     
     public function status(): BelongsTo { 
         return $this->belongsTo(Status::class); 
+    }
+
+    public function document()
+    {
+        return $this->belongsTo(ProjectDocument::class, 'project_document_id');
     }
     
 }

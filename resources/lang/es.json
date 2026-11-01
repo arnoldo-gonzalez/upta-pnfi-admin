@@ -181,5 +181,52 @@
     "Download / View PDF": "Descargar / Ver PDF",
     "Protocol submitted successfully. Your project is now in review.": "Protocolo enviado exitosamente. Tu proyecto está ahora en revisión.",
 
-    "Select your section": "Selecciona tu sección"
+    "Select your section": "Selecciona tu sección",
+
+    "Evaluations": "Evaluaciones",
+    "Project": "Proyecto",
+    "Project Evaluations": "Evaluaciones de Proyectos",
+    "Assign Evaluators": "Asignar Evaluadores",
+    "No pending projects to evaluate.": "No hay proyectos pendientes por evaluar.",
+    "Select Teachers": "Seleccionar Docentes",
+    "Assign and Notify": "Asignar y Notificar",
+    "My Evaluations": "Mis Evaluaciones",
+    "My Assigned Evaluations": "Mis Evaluaciones Asignadas",
+    "Stage": "Etapa",
+    "Review": "Revisar",
+    "No pending evaluations assigned to you.": "No tienes evaluaciones pendientes asignadas.",
+    "Back to list": "Volver a la lista",
+    "Download PDF": "Descargar PDF",
+    "Document not found.": "Documento no encontrado.",
+    "Decision": "Decisión",
+    "Reject with observations": "Rechazar con observaciones",
+    "Observations": "Observaciones",
+    "Required if rejected...": "Requerido si se rechaza...",
+    "Submit Evaluation": "Enviar Evaluación",
+    "Evaluators assigned successfully.": "Evaluadores asignados exitosamente.",
+    "Evaluation submitted successfully.": "Evaluación enviada exitosamente.",
+
+    "No new notifications": "No hay nuevas notificaciones",
+    "Notifications": "Notificaciones",
+    
+    "Mark all as read": "Marcar todas como leídas",
+    "All notifications marked as read.": "Todas las notificaciones han sido marcadas como leídas.",
+    "ID:": "CI:",
+
+    "Submit": "Subir",
+    "Submission": "Envio",
+    "Download File": "Descargar archivo",
+
+    "Submission History": "Historial de subidas",
+
+    "Needs Corrections": "Requiere Correcciones",
+    "Corrections Required": "Correcciones Requeridas",
+    "Resubmit Protocol": "Reenviar Protocolo",
+
+    "Evaluation History": "Historial de Evaluaciones",
+    "Back to Pending": "Volver a Pendientes",
+    "View Timeline": "Ver Cronología",
+    "You have not evaluated any projects yet.": "Aún no has evaluado ningún proyecto.",
+    "Timeline for": "Cronología de",
+    "History": "Historial"
 }
