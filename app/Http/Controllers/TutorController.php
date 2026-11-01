@@ -6,6 +6,7 @@ use App\Enums\TutorRequestStatus;
 use App\Models\Project;
 use App\Models\User;
 use App\Enums\UserStatus;
+use App\Models\ProjectStudent;
 use Illuminate\Http\Request;
 use App\Notifications\TutorRequested;
 use App\Notifications\TutorResponse;
@@ -53,6 +54,38 @@ class TutorController extends Controller
     }
 
     // --- VISTAS DEL ESTUDIANTE ---
+
+    public function studentIndex()
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $enrollment = $user->enrollments()->where('is_active', true)->first();
+        
+        // Buscamos el proyecto del estudiante
+        $projectStudent = ProjectStudent::where('enrollment_id', $enrollment->id)->first();
+        $project = $projectStudent ? $projectStudent->project : null;
+
+        $availableTeachers = collect();
+        $tutorLogs = collect();
+
+        if ($project) {
+            // 1. Si el proyecto está aprobado, la sección abierta y NO tiene tutor aceptado, mostramos la lista de docentes
+            if ($project->status_id === UserStatus::ACTIVE->value && $project->section->is_active && $project->tutor_request_status_id !== TutorRequestStatus::ACCEPTED->value) {
+                $availableTeachers = User::role('docente')
+                    ->where('status_id', UserStatus::ACTIVE->value)
+                    ->orderBy('name')
+                    ->get();
+            }
+
+            // 2. Si ya tiene tutor aceptado, cargamos la bitácora
+            if ($project->tutor_request_status_id === TutorRequestStatus::ACCEPTED->value) {
+                $tutorLogs = $project->tutorLogs()->orderBy('meeting_date', 'desc')->get();
+            }
+        }
+
+        return view('tutors.student.index', compact('project', 'availableTeachers', 'tutorLogs'));
+    }
+
     public function request(Request $request, Project $project)
     {
         $request->validate(['tutor_id' => ['required', 'exists:users,id']]);

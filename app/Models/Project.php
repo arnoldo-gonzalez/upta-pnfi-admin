@@ -53,6 +53,11 @@ class Project extends Model
         return $this->belongsTo(SectionTeacher::class, 'section_teacher_id');
     }
 
+    public function tutorLogs()
+    {
+        return $this->hasMany(TutorLog::class);
+    }
+
     public function invitations()
     {
         return $this->hasMany(ProjectInvitation::class);

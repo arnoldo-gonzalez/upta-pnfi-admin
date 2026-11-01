@@ -30,6 +30,10 @@
                 <svg class="mr-3 h-5 w-5 text-upta-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 {{ __('My Project') }}
             </a>
+            <a href="{{ route('tutors.student.index') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('tutors.student.*') ? 'bg-upta-700 text-white' : 'text-upta-100 hover:bg-upta-800 hover:text-white' }}">
+                <svg class="mr-3 h-5 w-5 text-upta-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                {{ __('My Tutor') }}
+            </a>
             @endrole
 
             <!-- 2. Menu: Gestión Académica -->
@@ -45,14 +49,15 @@
                 </button>
                 <!-- Submenu -->
                 <div x-show="expanded" x-transition class="mt-1 space-y-1 pl-10 pr-2">
-                    <a href="#" class="block px-3 py-2 text-sm font-medium text-upta-200 rounded-md hover:bg-upta-800 hover:text-white">
+                    <a href="{{ route('coordinator.protocols') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('coordinator.protocols') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
                         {{ __('Protocols') }}
                     </a>
-                    <a href="#" class="block px-3 py-2 text-sm font-medium text-upta-200 rounded-md hover:bg-upta-800 hover:text-white">
+                    
+                    <a href="#" class="block px-3 py-2 text-sm font-medium text-upta-200 rounded-md hover:bg-upta-800 hover:text-white opacity-50 cursor-not-allowed">
                         {{ __('Registrations') }}
                     </a>
-                    <a href="#" class="block px-3 py-2 text-sm font-medium text-upta-200 rounded-md hover:bg-upta-800 hover:text-white">
-                        {{ __('Tutorials') }}
+                    <a href="{{ route('coordinator.tutorships') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('coordinator.tutorships') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
+                        {{ __('Tutorships') }}
                     </a>
                     <a href="{{ route('evaluations.coordinator.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('evaluations.coordinator.*') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
                         {{ __('Evaluations') }}
@@ -83,6 +88,10 @@
             <a href="{{ route('tutors.index') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('tutors.*') ? 'bg-upta-700 text-white' : 'text-upta-100 hover:bg-upta-800 hover:text-white' }}">
                 <svg class="mr-3 h-5 w-5 text-upta-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 {{ __('Tutoring Requests') }}
+            </a>
+            <a href="{{ route('tutor-logs.teacher') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('tutor-logs.teacher') ? 'bg-upta-700 text-white' : 'text-upta-100 hover:bg-upta-800 hover:text-white' }}">
+                <svg class="mr-3 h-5 w-5 text-upta-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                {{ __('Review Logbooks') }}
             </a>
             @endrole
 

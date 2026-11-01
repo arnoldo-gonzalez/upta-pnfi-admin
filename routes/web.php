@@ -10,6 +10,7 @@ use App\Http\Controllers\ProjectInvitationController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\TutorController;
+use App\Http\Controllers\TutorLogController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -32,6 +33,8 @@ Route::middleware(['auth'/* , 'verified' */])->group(function () {
     Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
     Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
     Route::post('/projects/{project}/submit-protocol', [ProjectController::class, 'submitProtocol'])->name('projects.submitProtocol');
+    Route::post('/projects/{project}/logs', [TutorLogController::class, 'store'])->name('tutor-logs.store');
+    Route::get('/my-tutor', [TutorController::class, 'studentIndex'])->name('tutors.student.index');
 
     Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
@@ -43,6 +46,7 @@ Route::middleware(['auth'/* , 'verified' */])->group(function () {
     Route::get('/my-tutor-requests', [TutorController::class, 'index'])->name('tutors.index');
     Route::post('/tutor-requests/{project}/accept', [TutorController::class, 'accept'])->name('tutors.accept');
     Route::post('/tutor-requests/{project}/reject', [TutorController::class, 'reject'])->name('tutors.reject');
+    Route::get('/tutor-logs/{log}/download', [TutorLogController::class, 'downloadLog'])->name('tutor-logs.download');
 
 });
 
@@ -71,6 +75,9 @@ Route::middleware(['auth', 'role:admin|coordinador'])->group(function () {
     Route::put('/teachers/{teacher}', [TeacherController::class, 'update'])->name('teachers.update');
     Route::delete('/teachers/{teacher}', [TeacherController::class, 'destroy'])->name('teachers.destroy');
 
+    Route::get('/coordinator/protocols', [ProjectController::class, 'protocols'])->name('coordinator.protocols');
+    Route::get('/coordinator/tutorships', [ProjectController::class, 'tutorships'])->name('coordinator.tutorships');
+
 });
 
 Route::middleware(['auth', 'role:admin|docente'])->group(function () {
@@ -96,6 +103,9 @@ Route::middleware(['auth', 'role:admin|coordinador|docente'])->group(function ()
     Route::get('/my-evaluations', [EvaluationController::class, 'teacherIndex'])->name('evaluations.teacher.index');
     Route::get('/my-evaluations/{evaluation}/review', [EvaluationController::class, 'reviewForm'])->name('evaluations.teacher.review');
     Route::post('/my-evaluations/{evaluation}/review', [EvaluationController::class, 'storeReview'])->name('evaluations.teacher.store');
+    
+    Route::get('/my-tutor-logs', [TutorLogController::class, 'teacherIndex'])->name('tutor-logs.teacher');
+    Route::post('/tutor-logs/{log}/review', [TutorLogController::class, 'review'])->name('tutor-logs.review');
     
 });
 

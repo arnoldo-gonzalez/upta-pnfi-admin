@@ -238,4 +238,29 @@ class ProjectController extends Controller
             }
         }
     }
+
+    // --- VISTAS DEL COORDINADOR ---
+
+    public function protocols()
+    {
+        // Traemos todos los proyectos que ya hayan subido su protocolo (que no estén en Borrador)
+        $projects = Project::with(['section.trayecto', 'investigationLine', 'students.enrollment.student'])
+            ->where('status_id', '!=', UserStatus::DRAFT->value)
+            ->orderBy('updated_at', 'desc')
+            ->paginate(10);
+
+        return view('coordinator.protocols', compact('projects'));
+    }
+
+    public function tutorships()
+    {
+        // Proyectos que ya tienen un tutor asignado
+        $projects = Project::with(['section.trayecto', 'tutor'])
+            ->whereNotNull('tutor_id')
+            ->where('tutor_request_status_id', \App\Enums\TutorRequestStatus::ACCEPTED->value)
+            ->orderBy('updated_at', 'desc')
+            ->paginate(10);
+
+        return view('coordinator.tutorships', compact('projects'));
+    }
 }

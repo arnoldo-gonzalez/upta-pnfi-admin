@@ -344,103 +344,14 @@
                         </div>
                     @endif
 
-                    <!-- GESTIÓN DE TUTOR -->
-                    @if($project->status_id === UserStatus::ACTIVE->value)
-                        <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6 mt-6">
-                            <h3 class="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{{ __('Academic Tutor') }}</h3>
-                            
-                            @if($project->tutor_request_status_id === TutorRequestStatus::PENDING->value)
-                                <div class="bg-yellow-50 p-4 rounded border border-yellow-200 text-sm text-yellow-800">
-                                    <p class="font-bold">{{ __('Request Pending') }}</p>
-                                    <p class="mt-1">{{ __('Waiting for') }} <strong>{{ $project->tutor->name }}</strong> {{ __('to accept your request.') }}</p>
-                                </div>
-                            @elseif($project->tutor_request_status_id === TutorRequestStatus::ACCEPTED->value)
-                                <div class="bg-green-50 p-4 rounded border border-green-200 text-sm text-green-800 flex items-center">
-                                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <div>
-                                        <p class="font-bold">{{ __('Tutor Assigned') }}</p>
-                                        <p class="mt-1">{{ $project->tutor->name }}</p>
-                                    </div>
-                                </div>
-                            @else
-                                @if($project->section->is_active)
-                                    <p class="text-xs text-gray-600 mb-4">{{ __('Select a teacher to be your academic tutor. (Note: Your subject advisor cannot be your tutor).') }}</p>
-                                    
-                                    <form action="{{ route('tutors.request', $project) }}" method="POST">
-                                        @csrf
-                                        
-                                        @php
-                                            // Mapeamos la colección de docentes a un array simple para Alpine
-                                            $teachersJson = $availableTeachers->map(function($t) {
-                                                return ['id' => $t->id, 'name' => $t->name];
-                                            });
-                                        @endphp
-
-                                        <div class="mb-3 relative" 
-                                            x-data="{
-                                                open: false,
-                                                search: '',
-                                                teacherId: '',
-                                                teachers: @js($teachersJson), 
-                                                get filteredTeachers() {
-                                                    if (this.search === '') return this.teachers;
-                                                    return this.teachers.filter(t => 
-                                                        t.name.toLowerCase().includes(this.search.toLowerCase())
-                                                    );
-                                                },
-                                                selectTeacher(id, name) {
-                                                    this.teacherId = id;
-                                                    this.search = name;
-                                                    this.open = false;
-                                                }
-                                            }" 
-                                            @click.away="open = false">
-                                            
-                                            <div class="relative">
-                                                <input 
-                                                    type="text" 
-                                                    x-model="search" 
-                                                    @focus="open = true"
-                                                    @keydown.escape="open = false"
-                                                    placeholder="{{ __('Search by name...') }}" 
-                                                    class="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500"
-                                                    autocomplete="off"
-                                                >
-                                                
-                                                <!-- Input oculto que se envía al backend -->
-                                                <input type="hidden" name="tutor_id" x-model="teacherId" required>
-
-                                                <ul x-show="open" 
-                                                    x-transition 
-                                                    class="absolute z-50 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm" 
-                                                    style="display: none;">
-                                                    
-                                                    <template x-for="teacher in filteredTeachers" :key="teacher.id">
-                                                        <li @click="selectTeacher(teacher.id, teacher.name)" 
-                                                            class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-upta-50 text-gray-900">
-                                                            <span x-text="teacher.name" class="font-medium"></span>
-                                                        </li>
-                                                    </template>
-                                                    
-                                                    <li x-show="filteredTeachers.length === 0" class="cursor-default select-none relative py-2 pl-3 pr-9 text-gray-500 text-sm">
-                                                        {{ __('No teachers found.') }}
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-
-                                        <button type="submit" 
-                                                :disabled="!teacherId"
-                                                class="w-full bg-upta-600 text-white text-sm font-semibold px-4 py-2 rounded hover:bg-upta-700 transition disabled:opacity-50 disabled:cursor-not-allowed mt-3">
-                                            {{ __('Request Tutor') }}
-                                        </button>
-                                    </form>
-                                @else
-                                    <p class="text-sm text-red-500">{{ __('The academic period is closed. You cannot request a tutor.') }}</p>
-                                @endif
-                            @endif
-                        </div>
-                    @endif
+                    <!-- Enlace al Módulo de Tutor -->
+                    <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6">
+                        <h3 class="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{{ __('Academic Tutor') }}</h3>
+                        <p class="text-xs text-gray-600 mb-4">{{ __('Manage your tutor request and view your tutoring logbook.') }}</p>
+                        <a href="{{ route('tutors.student.index') }}" class="block text-center w-full bg-upta-50 text-upta-700 border border-upta-200 text-sm font-semibold px-4 py-2 rounded hover:bg-upta-100 transition">
+                            {{ __('Go to My Tutor') }}
+                        </a>
+                    </div>
 
                 </div>
             </div>
