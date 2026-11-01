@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             RoleAndUserSeeder::class,
             TrayectoSeeder::class,
             ProjectBaseDataSeeder::class,
+            EventTypeSeeder::class,
         ]);
     }
 }

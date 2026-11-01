@@ -62,6 +62,10 @@
                     <a href="{{ route('evaluations.coordinator.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('evaluations.coordinator.*') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
                         {{ __('Evaluations') }}
                     </a>
+
+                    <a href="{{ route('events.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('events.*') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
+                        {{ __('Academic Events') }}
+                    </a>
                 </div>
             </div>
             @endrole

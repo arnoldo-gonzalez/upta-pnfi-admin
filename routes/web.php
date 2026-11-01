@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\StudentController;
@@ -21,9 +23,7 @@ Route::middleware(['auth'/* , 'verified' */])->group(function () {
 
     Route::get('/documents/{document}/download', [ProjectDocumentController::class, 'download'])->name('documents.download');
 
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::post('/projects/invite', [ProjectInvitationController::class, 'store'])->name('projects.invite');
     Route::post('/invitations/{invitation}/accept', [ProjectInvitationController::class, 'accept'])->name('invitations.accept');
@@ -77,6 +77,8 @@ Route::middleware(['auth', 'role:admin|coordinador'])->group(function () {
 
     Route::get('/coordinator/protocols', [ProjectController::class, 'protocols'])->name('coordinator.protocols');
     Route::get('/coordinator/tutorships', [ProjectController::class, 'tutorships'])->name('coordinator.tutorships');
+
+    Route::resource('events', EventController::class)->except(['show', 'edit', 'update']);
 
 });
 

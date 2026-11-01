@@ -59,7 +59,16 @@ class TutorController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = auth()->user();
+
+        if (!$user->hasRole('estudiante')) {
+            return redirect()->route('dashboard');
+        }
+
         $enrollment = $user->enrollments()->where('is_active', true)->first();
+
+        if (!$enrollment) {
+            return redirect()->route('dashboard')->with('error', __('You do not have an active enrollment.'));
+        }
         
         // Buscamos el proyecto del estudiante
         $projectStudent = ProjectStudent::where('enrollment_id', $enrollment->id)->first();
