@@ -16,7 +16,12 @@ class StudentController extends Controller
     public function index()
     {
         $students = User::role('estudiante')
-            ->with('status')
+            ->with([
+                'status',
+                'enrollments' => function($query) {
+                    $query->where('is_active', true)->with('section.trayecto');
+                }
+            ])
             ->orderBy('name', 'asc')
             ->paginate(15);
 

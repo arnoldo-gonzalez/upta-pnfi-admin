@@ -228,5 +228,32 @@
     "View Timeline": "Ver Cronología",
     "You have not evaluated any projects yet.": "Aún no has evaluado ningún proyecto.",
     "Timeline for": "Cronología de",
-    "History": "Historial"
+    "History": "Historial",
+    "Edit Section": "Editar Sección",
+
+    "Academic Period": "Periodo Académico",
+    "Close Active Period": "Cerrar Periodo Activo",
+    "Clone Period": "Clonar Periodo",
+    "Current Period": "Periodo Actual",
+    "New Period": "Periodo Nuevo",
+    "Clone Now": "Clonar Ahora",
+    "All active sections have been closed.": "Todas las secciones activas han sido cerradas.",
+    "Are you sure you want to close ALL active sections?": "¿Estás seguro de que deseas cerrar TODAS las secciones activas?",
+    "No sections found for the period :period.": "No se encontraron secciones para el periodo :period.",
+    "Sections cloned to period :period successfully.": "Secciones clonadas al periodo :period exitosamente.",
+    "Period": "Periodo",
+    "Closed": "Cerrado",
+    "Close Period": "Cerrar Periodo",
+    "Academic Info": "Info Académica",
+    "No active enrollment": "Sin inscripción activa",
+    "No Trayecto": "Sin Trayecto",
+
+    "The selected section is closed or does not exist.": "La sección seleccionada está cerrada o no existe.",
+    "You cannot create a project in a closed section.": "No puedes crear un proyecto en una sección cerrada.",
+    "You cannot invite members because the academic period is closed.": "No puedes invitar miembros porque el periodo académico está cerrado.",
+    "You cannot accept this invitation because the academic period is closed.": "No puedes aceptar esta invitación porque el periodo académico está cerrado.",
+    "The academic period is closed. You cannot create new projects.": "El periodo académico está cerrado. No puedes crear nuevos proyectos.",
+    "The academic period is closed. You can no longer invite members.": "El periodo académico está cerrado. Ya no puedes invitar miembros.",
+
+    "Are you sure you want to close ALL active sections? No new students will be able to enroll until you create new sections.": "¿Estás seguro de que quieres cerrar TODAS las secciones activas? No podrán inscribirse nuevos estudiantes hasta que crees nuevas secciones."
 }

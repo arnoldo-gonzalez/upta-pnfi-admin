@@ -12,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'name',
     'trayecto_id',
-    'max_team_size'
+    'max_team_size',
+    'period',
+    'is_active'
 ])]
 class Section extends Model
 {

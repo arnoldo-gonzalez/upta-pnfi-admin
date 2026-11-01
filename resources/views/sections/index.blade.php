@@ -5,9 +5,49 @@
         <div class="flex justify-between items-center mb-6">
             <x-heading level="h1">{{ __('Sections') }}</x-heading>
             
-            <a href="{{ route('sections.create') }}" class="bg-upta-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-upta-700 transition shadow-sm">
-                {{ __('Create Section') }}
-            </a>
+            <div class="flex flex-wrap gap-2 items-center">
+                <!-- Botón para Cerrar Periodo -->
+                <x-confirm-action 
+                    :action="route('sections.closePeriod')" 
+                    method="POST"
+                    title="Close Active Period"
+                    message="Are you sure you want to close ALL active sections? No new students will be able to enroll until you create new sections."
+                    confirmText="Close Period"
+                    icon="warning"
+                >
+                    <button type="button" class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-md text-sm font-semibold hover:bg-red-100 transition">
+                        {{ __('Close Active Period') }}
+                    </button>
+                </x-confirm-action>
+
+                <!-- Botón para Clonar Periodo (Abre un pequeño formulario con Alpine) -->
+                <div x-data="{ openClone: false }" class="relative">
+                    <button @click="openClone = !openClone" class="bg-gray-100 text-gray-700 border border-gray-300 px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-200 transition">
+                        {{ __('Clone Period') }}
+                    </button>
+                    
+                    <div x-show="openClone" @click.away="openClone = false" class="absolute right-0 mt-2 w-64 bg-white p-4 rounded shadow-lg border border-gray-200 z-50" style="display: none;">
+                        <form action="{{ route('sections.clonePeriod') }}" method="POST">
+                            @csrf
+                            <div class="mb-2">
+                                <label class="text-xs font-bold text-gray-600">{{ __('Current Period') }}</label>
+                                <input type="text" name="current_period" placeholder="2024-2025" class="w-full text-sm rounded border-gray-300" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-xs font-bold text-gray-600">{{ __('New Period') }}</label>
+                                <input type="text" name="new_period" placeholder="2025-2026" class="w-full text-sm rounded border-gray-300" required>
+                            </div>
+                            <button type="submit" class="w-full bg-upta-600 text-white text-xs font-bold py-2 rounded hover:bg-upta-700">
+                                {{ __('Clone Now') }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <a href="{{ route('sections.create') }}" class="bg-upta-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-upta-700 transition shadow-sm">
+                    {{ __('Create Section') }}
+                </a>
+            </div>
         </div>
 
         <!-- Tabla -->
@@ -17,6 +57,7 @@
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-bold text-upta-900 uppercase tracking-wider">{{ __('Section') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-bold text-upta-900 uppercase tracking-wider">{{ __('Trayecto') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-upta-900 uppercase tracking-wider">{{ __('Period') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-bold text-upta-900 uppercase tracking-wider">{{ __('Advisor (Teacher)') }}</th>
                         <th class="px-6 py-3 text-center text-xs font-bold text-upta-900 uppercase tracking-wider">{{ __('Actions') }}</th>
                     </tr>
@@ -29,6 +70,13 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ $section->trayecto->name }}
+                            </td>
+
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ $section->period }} 
+                                @if(!$section->is_active)
+                                    <span class="text-xs text-red-500 font-bold ml-1">({{ __('Closed') }})</span>
+                                @endif
                             </td>
 
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

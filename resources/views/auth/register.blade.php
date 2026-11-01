@@ -27,14 +27,18 @@
                 <x-input-label for="section_id" :value="__('Section')" />
                 <select name="section_id" id="section_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                     <option value="">{{ __('Select your section') }}</option>
-                    @foreach(Trayecto::with('sections')->get() as $trayecto)
-                        <optgroup label="{{ $trayecto->name }}">
-                            @foreach($trayecto->sections as $section)
-                                <option value="{{ $section->id }}" {{ old('section_id') == $section->id ? 'selected' : '' }}>
-                                    {{ $section->name }}
-                                </option>
-                            @endforeach
-                        </optgroup>
+                    @foreach(Trayecto::with(['sections' => function($query) {
+                        $query->where('is_active', true);
+                    }])->get() as $trayecto)
+                        @if($trayecto->sections->count() > 0)
+                            <optgroup label="{{ $trayecto->name }}">
+                                @foreach($trayecto->sections as $section)
+                                    <option value="{{ $section->id }}" {{ old('section_id') == $section->id ? 'selected' : '' }}>
+                                        {{ $section->name }} - {{ $section->period }}
+                                    </option>
+                                @endforeach
+                            </optgroup>
+                        @endif
                     @endforeach
                 </select>
                 <x-input-error :messages="$errors->get('section_id')" class="mt-2" />

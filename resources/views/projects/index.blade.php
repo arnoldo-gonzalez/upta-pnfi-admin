@@ -34,13 +34,22 @@
         @if (!$project)
             <div class="text-center bg-white p-12 rounded-lg shadow-sm border border-gray-200">
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+
                 <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('No Project Found') }}</h3>
-                <p class="mt-1 text-sm text-gray-500">{{ __('You are not registered in any project yet. You can create one or wait for an invitation.') }}</p>
-                <div class="mt-6">
-                    <a href="{{ route('projects.create') }}" class="inline-flex items-center px-4 py-2 bg-upta-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-upta-700 focus:outline-none transition ease-in-out duration-150">
-                        {{ __('Register My Project') }}
-                    </a>
-                </div>
+
+                @if($enrollment->section->is_active)
+                
+                    <p class="mt-1 text-sm text-gray-500">{{ __('You are not registered in any project yet. You can create one or wait for an invitation.') }}</p>
+                
+                    <div class="mt-6">
+                        <a href="{{ route('projects.create') }}" class="inline-flex items-center px-4 py-2 bg-upta-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-upta-700 focus:outline-none transition ease-in-out duration-150">
+                            {{ __('Register My Project') }}
+                        </a>
+                    </div>
+
+                @else
+                    <p class="mt-2 text-sm text-red-500 font-medium">{{ __('The academic period is closed. You cannot create new projects.') }}</p>
+                @endif
             </div>
         @else
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -159,7 +168,7 @@
                     @endphp
 
                     <!-- 1. FORMULARIO DE SUBIDA (Borrador o Rechazado) -->
-                    @if($project->status_id === UserStatus::DRAFT->value || $project->status_id === UserStatus::NEEDS_CORRECTIONS->value)
+                    @if($project->section->is_active && ($project->status_id === UserStatus::DRAFT->value || $project->status_id === UserStatus::NEEDS_CORRECTIONS->value) )
                         
                         <!-- ALERTA DE OBSERVACIONES (Solo si fue rechazado) -->
                         @if($project->status_id === UserStatus::NEEDS_CORRECTIONS->value)
@@ -232,7 +241,7 @@
                     @endif
                     
                     <!-- 3. Invitar Estudiantes -->
-                    @if($project->status_id === UserStatus::DRAFT->value && $hasSpace)
+                    @if($project->status_id === UserStatus::DRAFT->value && $hasSpace && $project->section->is_active)
                         <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6">
                             <h3 class="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{{ __('Invite Classmates') }}</h3>
                             

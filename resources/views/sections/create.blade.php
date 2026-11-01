@@ -68,6 +68,17 @@
                     @enderror
                 </div>
 
+                <!-- Periodo -->
+                <div class="mb-4">
+                    <label for="period" class="block text-sm font-medium text-gray-700">{{ __('Academic Period') }}</label>
+                    <input type="text" name="period" id="period" value="{{ old('period', '2025-2026') }}" 
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" 
+                           placeholder="Ej: 2025-2026" required>
+                    @error('period')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Botón Guardar -->
                 <div class="flex justify-end">
                     <button type="submit" class="bg-upta-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-upta-700 transition shadow-sm">

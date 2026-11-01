@@ -6,6 +6,7 @@ use App\Models\Section;
 use App\Models\Trayecto;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SectionController extends Controller
 {
@@ -98,20 +99,59 @@ class SectionController extends Controller
             'trayecto_id' => ['required', 'exists:trayectos,id'],
             'max_team_size' => ['required', 'integer', 'min:1'],
             'teacher_id' => ['nullable', 'exists:users,id'],
+            'period' => ['required', 'string', 'max:20'],
         ]);
 
         $section = Section::create([
             'name' => $request->name,
             'trayecto_id' => $request->trayecto_id,
             'max_team_size' => $request->max_team_size,
+            'period' => $request->period,
+            'is_active' => true,      
         ]);
 
         if ($request->filled('teacher_id')) {
-            $section->teachers()->attach($request->teacher_id, [
-                'is_active' => true
-            ]);
+            $section->teachers()->attach($request->teacher_id, ['is_active' => true]);
         }
 
         return redirect()->route('sections.index')->with('success', __('Section created successfully.'));
     }
+
+    // Cerrar todas las secciones activas (sin importar el periodo, cerrará las que estén abiertas)
+    public function closePeriod(Request $request)
+    {
+        Section::where('is_active', true)->update(['is_active' => false]);
+
+        return redirect()->route('sections.index')->with('success', __('All active sections have been closed.'));
+    }
+
+    // Clonar secciones de un periodo a otro
+    public function clonePeriod(Request $request)
+    {
+        $request->validate([
+            'current_period' => ['required', 'string'],
+            'new_period' => ['required', 'string', 'different:current_period'],
+        ]);
+
+        $currentSections = Section::where('period', $request->current_period)->get();
+
+        if ($currentSections->isEmpty()) {
+            return back()->with('error', __('No sections found for the period :period.', ['period' => $request->current_period]));
+        }
+
+        DB::transaction(function () use ($currentSections, $request) {
+            foreach ($currentSections as $section) {
+                Section::create([
+                    'name' => $section->name,
+                    'trayecto_id' => $section->trayecto_id,
+                    'max_team_size' => $section->max_team_size,
+                    'period' => $request->new_period,
+                    'is_active' => true,
+                ]);
+            }
+        });
+
+        return redirect()->route('sections.index')->with('success', __('Sections cloned to period :period successfully.', ['period' => $request->new_period]));
+    }
+
 }

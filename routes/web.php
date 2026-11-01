@@ -51,6 +51,9 @@ Route::middleware(['auth', 'role:admin|coordinador'])->group(function () {
     Route::put('/sections/{section}', [SectionController::class, 'update'])->name('sections.update');
     Route::delete('/sections/{section}', [SectionController::class, 'destroy'])->name('sections.destroy');
 
+    Route::post('/sections/close-period', [SectionController::class, 'closePeriod'])->name('sections.closePeriod');
+    Route::post('/sections/clone-period', [SectionController::class, 'clonePeriod'])->name('sections.clonePeriod');
+
     // Rutas para la gestión de docentes
     Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index');
     Route::get('/teachers/create', [TeacherController::class, 'create'])->name('teachers.create');

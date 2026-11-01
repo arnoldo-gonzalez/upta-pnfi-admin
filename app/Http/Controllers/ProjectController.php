@@ -107,6 +107,10 @@ class ProjectController extends Controller
             return back()->with('error', __('You do not have an active enrollment.'));
         }
 
+        if (!$enrollment->section->is_active) {
+            return back()->with('error', __('You cannot create a project in a closed section.'));
+        }
+
         DB::transaction(function () use ($request, $enrollment) {
             
             $activeTeacher = $enrollment->section->activeTeacher->first();

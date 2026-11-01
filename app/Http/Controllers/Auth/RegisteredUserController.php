@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use App\Models\Section;
 
 class RegisteredUserController extends Controller
 {
@@ -40,6 +41,14 @@ class RegisteredUserController extends Controller
             'section_id' => ['required', 'exists:sections,id'], 
         ]);
 
+        $section = Section::find($request->section_id);
+        
+        if (!$section || !$section->is_active) {
+            return back()->withInput()->withErrors([
+                'section_id' => __('The selected section is closed or does not exist.')
+            ]);
+        }
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -54,7 +63,7 @@ class RegisteredUserController extends Controller
         // CREAR LA INSCRIPCIÓN (ENROLLMENT)
         Enrollment::create([
             'user_id' => $user->id,
-            'section_id' => $request->section_id,
+            'section_id' => $section->id,
             'is_active' => true,
         ]);
 

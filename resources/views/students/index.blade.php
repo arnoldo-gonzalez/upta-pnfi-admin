@@ -9,12 +9,12 @@
         </div>
 
         <div class="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden">
-            <!-- Pasamos variables en inglés: $students -->
             <x-users-table 
                 :users="$students" 
                 roleName="{{ __('Student') }}" 
                 routePrefix="students" 
                 :showApproval="true" 
+                :showAcademicInfo="true" 
             />
         </div>
     </div>

@@ -91,7 +91,7 @@ class RoleAndUserSeeder extends Seeder
             
             $trayecto = Trayecto::firstOrCreate(['number' => 2], ['name' => 'Trayecto 2']);
             $seccion = Section::firstOrCreate(
-                ['name' => 'Sección 1', 'trayecto_id' => $trayecto->id]
+                ['name' => 'Sección 1', 'trayecto_id' => $trayecto->id, 'period' => '2026-2027']
             );
     
             Enrollment::firstOrCreate([

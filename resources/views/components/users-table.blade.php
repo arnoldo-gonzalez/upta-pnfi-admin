@@ -4,7 +4,8 @@
     'users', 
     'roleName' => 'User', 
     'routePrefix', 
-    'showApproval' => false
+    'showApproval' => false,
+    'showAcademicInfo' => false
 ])
 
 <div {{ $attributes->merge(['class' => 'overflow-x-auto']) }}>
@@ -17,6 +18,11 @@
                 <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-upta-900 uppercase tracking-wider">
                     {{ __($roleName) }}
                 </th>
+                @if($showAcademicInfo)
+                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-upta-900 uppercase tracking-wider">
+                    {{ __('Academic Info') }}
+                </th>
+                @endif
                 <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-upta-900 uppercase tracking-wider">
                     {{ __('Contact') }}
                 </th>
@@ -41,6 +47,28 @@
                         <div class="text-sm font-medium text-gray-900">{{ $user->name }}</div>
                         <div class="text-sm text-gray-500">{{ $user->email }}</div>
                     </td>
+
+                    @if($showAcademicInfo)
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        @php
+                            // Tomamos la primera inscripción
+                            $enrollment = $user->enrollments->first();
+                        @endphp
+                        
+                        @if($enrollment && $enrollment->section)
+                            <div class="text-sm font-medium text-gray-900">
+                                {{ $enrollment->section->trayecto->name ?? __('No Trayecto') }}
+                            </div>
+                            <div class="text-xs text-gray-500">
+                                {{ $enrollment->section->name }} 
+                                <span class="text-gray-400">|</span> 
+                                {{ $enrollment->section->period }}
+                            </div>
+                        @else
+                            <span class="text-gray-400 italic text-xs">{{ __('No active enrollment') }}</span>
+                        @endif
+                    </td>
+                    @endif
 
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {{ $user->phone }}

@@ -32,6 +32,10 @@ class ProjectInvitationController extends Controller
             return back()->with('error', __('You cannot invite members to a project that is already in review.'));
         }
 
+        if (!$project->section->is_active) {
+            return back()->with('error', __('You cannot invite members because the academic period is closed.'));
+        }
+
         // 1. Contar miembros actuales
         $currentMembers = ProjectStudent::where('project_id', $project->id)->count();
         
@@ -84,6 +88,10 @@ class ProjectInvitationController extends Controller
         $currentMembers = ProjectStudent::where('project_id', $project->id)->count();
         if ($currentMembers >= $project->section->max_team_size) {
             return back()->with('error', __('The team has reached the maximum size. You cannot accept this invitation.'));
+        }
+
+        if (!$project->section->is_active) {
+            return back()->with('error', __('You cannot accept this invitation because the academic period is closed.'));
         }
 
         $invitation->update(['status_id' => UserStatus::ACTIVE->value]);
