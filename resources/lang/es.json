@@ -255,5 +255,26 @@
     "The academic period is closed. You cannot create new projects.": "El periodo académico está cerrado. No puedes crear nuevos proyectos.",
     "The academic period is closed. You can no longer invite members.": "El periodo académico está cerrado. Ya no puedes invitar miembros.",
 
-    "Are you sure you want to close ALL active sections? No new students will be able to enroll until you create new sections.": "¿Estás seguro de que quieres cerrar TODAS las secciones activas? No podrán inscribirse nuevos estudiantes hasta que crees nuevas secciones."
+    "Are you sure you want to close ALL active sections? No new students will be able to enroll until you create new sections.": "¿Estás seguro de que quieres cerrar TODAS las secciones activas? No podrán inscribirse nuevos estudiantes hasta que crees nuevas secciones.",
+
+    "Tutoring Requests": "Solicitudes de Tutoría",
+    "You have no pending tutoring requests.": "No tienes solicitudes de tutoría pendientes.",
+    "Academic Tutor": "Tutor Académico",
+    "Request Pending": "Solicitud Pendiente",
+    "Waiting for": "Esperando a que",
+    "to accept your request.": "acepte tu solicitud.",
+    "Tutor Assigned": "Tutor Asignado",
+    "Select a teacher to be your academic tutor. (Note: Your subject advisor cannot be your tutor).": "Selecciona un docente para ser tu tutor académico. (Nota: Tu asesor de materia no puede ser tu tutor).",
+    "Select a teacher": "Seleccione un docente",
+    "Request Tutor": "Solicitar Tutor",
+    "You have accepted the tutoring request.": "Has aceptado la solicitud de tutoría.",
+    "You have rejected the tutoring request.": "Has rechazado la solicitud de tutoría.",
+    "Your project must be approved before selecting a tutor.": "Tu proyecto debe estar aprobado antes de seleccionar un tutor.",
+    "You cannot request a tutor because the academic period is closed.": "No puedes solicitar un tutor porque el periodo académico está cerrado.",
+    "The subject advisor cannot be selected as your project tutor.": "El asesor de la materia no puede ser seleccionado como tutor del proyecto.",
+    "Tutoring request sent successfully.": "Solicitud de tutoría enviada exitosamente.",
+    "You must provide this password to the teacher so they can log in.": "Debes facilitarle esta contraseña al profesor para que pueda iniciar sesión.",
+    "The academic period is closed. You cannot request a tutor.": "El periodo académico está cerrado. No puedes solicitar un tutor.",
+    "Search by name...": "Buscar por nombre...",
+    "No teachers found.": "No se encontraron docentes."
 }

@@ -44,6 +44,14 @@ class ProjectController extends Controller
         $receivedInvitations = collect();
         $availableStudents = collect();
         $sentInvitations = collect();
+        $availableTeachers = collect();
+
+        if ($project && $project->status_id === UserStatus::ACTIVE->value && $project->section->is_active) {
+            $availableTeachers = User::role('docente')
+                ->where('status_id', UserStatus::ACTIVE->value)
+                ->orderBy('name')
+            ->get();
+        }
 
         $receivedInvitations = ProjectInvitation::with(['project', 'sender.student'])
             ->where('receiver_enrollment_id', $enrollment->id)
@@ -84,7 +92,7 @@ class ProjectController extends Controller
             ];
         });
 
-        return view('projects.index', compact('project', 'teamMembers', 'sentInvitations', 'receivedInvitations', 'enrollment', 'availableStudents', 'studentsJson'));
+        return view('projects.index', compact('availableTeachers', 'project', 'teamMembers', 'sentInvitations', 'receivedInvitations', 'enrollment', 'availableStudents', 'studentsJson'));
     }
 
     public function create()

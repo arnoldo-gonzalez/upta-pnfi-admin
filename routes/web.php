@@ -9,6 +9,7 @@ use App\Http\Controllers\ProjectDocumentController;
 use App\Http\Controllers\ProjectInvitationController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\TutorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -34,6 +35,14 @@ Route::middleware(['auth'/* , 'verified' */])->group(function () {
 
     Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
+
+    // Estudiante
+    Route::post('/projects/{project}/request-tutor', [TutorController::class, 'request'])->name('tutors.request');
+    
+    // Docente
+    Route::get('/my-tutor-requests', [TutorController::class, 'index'])->name('tutors.index');
+    Route::post('/tutor-requests/{project}/accept', [TutorController::class, 'accept'])->name('tutors.accept');
+    Route::post('/tutor-requests/{project}/reject', [TutorController::class, 'reject'])->name('tutors.reject');
 
 });
 

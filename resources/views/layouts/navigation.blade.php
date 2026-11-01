@@ -80,6 +80,10 @@
                     </a>
                 </div>
             </div>
+            <a href="{{ route('tutors.index') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('tutors.*') ? 'bg-upta-700 text-white' : 'text-upta-100 hover:bg-upta-800 hover:text-white' }}">
+                <svg class="mr-3 h-5 w-5 text-upta-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                {{ __('Tutoring Requests') }}
+            </a>
             @endrole
 
             <!-- 3. Menu: Usuarios -->
