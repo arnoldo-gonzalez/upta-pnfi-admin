@@ -26,36 +26,29 @@ jobs:
         run: |
           composer install --no-ansi --no-dev --no-interaction --no-plugins --no-progress --no-scripts --optimize-autoloader
 
-      # 3. Validar formato de la Clave SSH antes de conectar
-      - name: Validar formato del secreto SSH
-        run: |
-          # Creamos un archivo temporal con el secreto
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/ssh_key
-          
-          # Forzamos saltos de línea estilo Linux y eliminamos espacios en blanco rebeldes
-          sed -i 's/\r$//' /tmp/ssh_key
-          chmod 600 /tmp/ssh_key
-          
-          ssh-keygen -l -f /tmp/ssh_key
-
-      # 4. Desplegar con Rsync y Optimizar Laravel (TODO EN UNO)
+      # 3. Desplegar con Rsync y Optimizar Laravel (Flujo Limpio y Robusto)
       - name: Desplegar y Optimizar Aplicación
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          # Inicializar agente SSH e inyectar la clave privada
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
+          # 1. Escribir y formatear la clave de forma ultra-segura
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/ssh_key
+          sed -i 's/\r$//' /tmp/ssh_key
+          chmod 600 /tmp/ssh_key
           
-          # Registrar el servidor en known_hosts para evitar bloqueos de conexión
+          # 2. Iniciar el agente y añadir la clave que YA está limpia
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add /tmp/ssh_key
+          
+          # 3. Registrar el servidor en known_hosts
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
           
-          # Asegurar de forma remota que la estructura de carpetas destino exista en el servidor
+          # 4. Asegurar de forma remota que la estructura de carpetas exista
           ssh -o IdentitiesOnly=yes "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" "mkdir -p ~/www/uptamcy/"
 
-          # Ejecutar Rsync apuntando a la nueva subcarpeta ~/www/uptamcy/
+          # 5. Ejecutar Rsync apuntando a ~/www/uptamcy/
           rsync -avz \
             -e "ssh -o IdentitiesOnly=yes" \
             --no-perms --no-owner --no-group \
@@ -69,22 +62,16 @@ jobs:
             --exclude='storage/framework/sessions/*' \
             . "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}":~/www/uptamcy/
 
-          # Conectarse vía SSH para ejecutar comandos de producción dentro de la ruta correcta
+          # 6. Ejecutar comandos de producción en el servidor
           ssh -o IdentitiesOnly=yes "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" << 'EOF'
-            # Entramos a la carpeta del proyecto Laravel
             cd ~/www/uptamcy/
             
-            # 1. Activar modo mantenimiento
             php artisan down
-            
-            # 2. Correr migraciones de Base de Datos sin confirmación interactiva
             php artisan migrate --force
-            
-            # 3. Limpiar y recrear las cachés de configuración y rutas para máximo rendimiento
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-            
-            # 4. Volver a encender la aplicación (Fin del mantenimiento)
             php artisan up
           EOF
+ 
+ 
