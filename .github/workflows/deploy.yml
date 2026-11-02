@@ -1,0 +1,88 @@
+name: Deploy Laravel via SSH and Rsync
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # 1. Configurar la versión de PHP necesaria para tu Laravel
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2' # <-- Cambia esto por tu versión de PHP (ej. 8.1, 8.3)
+          extensions: mbstring, xml, ctype, iconv, mysql, zip, bcmath
+          coverage: none
+
+      # 2. Instalar dependencias de Composer (Optimizado para producción)
+      - name: Instalar dependencias de Composer
+        run: |
+          composer install --no-ansi --no-dev --no-interaction --no-plugins --no-progress --no-scripts --optimize-autoloader
+
+      # 3. COMPILACIÓN FRONTEND (Opcional): Descomenta si usas Vite o Mix
+      - name: Instalar Node.js y compilar Assets
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build Assets
+        run: |
+          npm install
+          npm run build
+
+      # 4. Validar formato de la Clave SSH antes de conectar
+      - name: Validar formato del secreto SSH
+        run: |
+          ssh-keygen -l -f <(echo "${{ secrets.SSH_PRIVATE_KEY }}")
+
+      # 5. Preparar SSH y desplegar con Rsync
+      - name: Desplegar a Producción usando Rsync
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          # Iniciar agente SSH e inyectar clave privada
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
+          
+          # Registrar el servidor en known_hosts para evitar bloqueos
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+          
+          # Ejecutar Rsync optimizado para Laravel
+          rsync -avz \
+            --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='node_modules/' \
+            --exclude='.env' \
+            --exclude='storage/logs/*' \
+            --exclude='storage/framework/sessions/*' \
+            . "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}":/var/www/my-laravel-app
+            
+      # 6. Comandos Post-Despliegue en el Servidor
+      - name: Optimizar Laravel en el Servidor
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          # Aseguramos que el agente SSH tenga acceso a la sesión para este paso
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
+
+          # Conectamos y ejecutamos los comandos línea por línea usando '\'
+          ssh "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
+            "cd /var/www/my-laravel-app && \
+             php artisan down && \
+             php artisan migrate --force && \
+             php artisan config:cache && \
+             php artisan route:cache && \
+             php artisan view:cache && \
+             php artisan up"
+
+          
