@@ -428,5 +428,9 @@
     "Why can I not invite more members to my team?": "¿Por qué no puedo invitar a más miembros a mi equipo?",
     "Each section has a maximum team size set by the coordinator. Also, if you already sent invitations that are pending, they count towards the limit to prevent overbooking the team.": "Cada sección tiene un tamaño máximo de equipo establecido por el coordinador. Además, si ya enviaste invitaciones que están pendientes, estas cuentan para el límite para evitar sobrepasar la capacidad del equipo.",
     "What happens when the academic period closes?": "¿Qué pasa cuando se cierra el periodo académico?",
-    "Once the coordinator closes the period, students can no longer create new projects, send invitations, or request tutors. You can still consult your project details and download documents.": "Una vez que el coordinador cierra el periodo, los estudiantes no pueden crear nuevos proyectos, enviar invitaciones ni solicitar tutores. Aún puedes consultar los detalles de tu proyecto y descargar documentos."
+    "Once the coordinator closes the period, students can no longer create new projects, send invitations, or request tutors. You can still consult your project details and download documents.": "Una vez que el coordinador cierra el periodo, los estudiantes no pueden crear nuevos proyectos, enviar invitaciones ni solicitar tutores. Aún puedes consultar los detalles de tu proyecto y descargar documentos.",
+
+    "Export to PDF": "Exportar a PDF",
+    "Students Report": "Reporte de Estudiantes",
+    "Teachers Report": "Reporte de Docentes"
 }

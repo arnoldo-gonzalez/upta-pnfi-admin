@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectDocumentController;
 use App\Http\Controllers\ProjectInvitationController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\TutorController;
@@ -19,6 +20,11 @@ Route::get('/', function () {
     return auth()->check() 
         ? redirect()->route('dashboard') 
         : redirect()->route('login');
+});
+
+Route::middleware(['auth', 'can:generate-reports'])->group(function () {
+    // Una sola ruta para todos los reportes
+    Route::get('/reports/{report}/print', [ReportController::class, 'print'])->name('reports.print');
 });
 
 Route::middleware(['auth'/* , 'verified' */])->group(function () {
@@ -99,7 +105,6 @@ Route::middleware(['auth', 'role:admin|coordinador|docente'])->group(function ()
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
     Route::post('/students/{student}/approve', [StudentController::class, 'approve'])->name('students.approve');
     Route::post('/students/{student}/reject', [StudentController::class, 'reject'])->name('students.reject');
-
     Route::get('/students/{student}/edit', [StudentController::class, 'edit'])->name('students.edit');
     Route::put('/students/{student}', [StudentController::class, 'update'])->name('students.update');
     Route::delete('/students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');

@@ -11,74 +11,70 @@ use Illuminate\Validation\Rule;
 class StudentController extends Controller
 {
     /**
-     * Display a listing of the students.
+     * Muestra el listado de estudiantes (filtrado por rol).
      */
     public function index()
     {
-        $students = User::role('estudiante')
+        /** @var \App\Models\User $currentUser */
+        $currentUser = auth()->user();
+        
+        $query = User::role('estudiante')
             ->with([
                 'status',
                 'enrollments' => function($query) {
                     $query->where('is_active', true)->with('section.trayecto');
                 }
-            ])
-            ->orderBy('name', 'asc')
-            ->paginate(15);
+            ]);
+
+        // Si es docente, solo ve a los estudiantes de sus secciones activas
+        if ($currentUser->hasRole('docente')) {
+            $query->whereHas('enrollments', function($q) use ($currentUser) {
+                $q->where('is_active', true)
+                  ->whereHas('section.activeTeacher', function($sub) use ($currentUser) {
+                      $sub->where('users.id', $currentUser->id);
+                  });
+            });
+        }
+
+        $students = $query->orderBy('name', 'asc')->paginate(15);
 
         return view('students.index', compact('students'));
     }
 
-    /**
-     * Approve a pending student.
-     */
+    // --- ACCIONES INDIVIDUALES ---
+
     public function approve(User $student)
     {
-        if (!$student->hasRole('estudiante')) {
-            return back()->with('error', __('The selected user is not a student.'));
-        }
-
-        $student->update([
-            'status_id' => UserStatus::ACTIVE->value
-        ]);
-
+        $this->authorizeStudent($student);
+        
+        $student->update(['status_id' => UserStatus::ACTIVE->value]);
         return back()->with('success', __('The student :name has been successfully approved.', ['name' => $student->name]));
     }
 
-    /**
-     * Reject a pending student.
-     */
     public function reject(User $student)
     {
-        if (!$student->hasRole('estudiante')) {
-            return back()->with('error', __('The selected user is not a student.'));
-        }
+        $this->authorizeStudent($student);
 
-        $student->update([
-            'status_id' => UserStatus::REJECTED->value
-        ]);
-
+        $student->update(['status_id' => UserStatus::REJECTED->value]);
         return back()->with('success', __('The student :name has been successfully rejected.', ['name' => $student->name]));
     }
 
-    /**
-     * Show the form for editing the specified student.
-     */
     public function edit(User $student)
     {
+        $this->authorizeStudent($student);
+        
         return view('students.edit', compact('student'));
     }
 
-    /**
-     * Update the specified student in storage.
-     */
     public function update(Request $request, User $student)
     {
+        $this->authorizeStudent($student);
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($student->id)],
             'credential' => ['required', 'numeric', 'digits_between:6,9', Rule::unique('users')->ignore($student->id)],
             'phone' => ['required', 'numeric', 'digits_between:10,11'],
-            
             'status_id' => ['required', 'exists:statuses,id'], 
             'password' => ['nullable', 'string', 'min:8'],
         ]);
@@ -92,23 +88,48 @@ class StudentController extends Controller
         ]);
 
         if ($request->filled('password')) {
-            $student->update([
-                'password' => Hash::make($request->password)
-            ]);
+            $student->update(['password' => Hash::make($request->password)]);
         }
 
-        return redirect()->route('students.index')
-                         ->with('success', __('Student updated successfully.'));
+        return redirect()->route('students.index')->with('success', __('Student updated successfully.'));
+    }
+
+    public function destroy(User $student)
+    {
+        $this->authorizeStudent($student);
+
+        $student->delete();
+        return redirect()->route('students.index')->with('success', __('Student deleted successfully.'));
     }
 
     /**
-     * Remove the specified student from storage.
+     * Método de seguridad reutilizable.
+     * Verifica si el usuario actual tiene permiso para gestionar a este estudiante.
      */
-    public function destroy(User $student)
+    private function authorizeStudent(User $student)
     {
-        $student->delete();
+        /** @var \App\Models\User $currentUser */
+        $currentUser = auth()->user();
 
-        return redirect()->route('students.index')
-                         ->with('success', __('Student deleted successfully.'));
+        // Admin y coordinador tienen vía libre
+        if ($currentUser->hasAnyRole(['admin', 'coordinador'])) {
+            return;
+        }
+
+        // Docente: validar que el estudiante esté en una de sus secciones
+        if ($currentUser->hasRole('docente')) {
+            $hasAccess = $student->enrollments()
+                ->where('is_active', true)
+                ->whereHas('section.activeTeacher', function($q) use ($currentUser) {
+                    $q->where('users.id', $currentUser->id);
+                })->exists();
+
+            if ($hasAccess) {
+                return;
+            }
+        }
+
+        // Si no cumple ninguna, bloqueamos
+        abort(403, 'No tienes permiso para gestionar a este estudiante.');
     }
 }

@@ -2,7 +2,18 @@
 
 <x-app-layout>
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <x-heading level="h1" class="mb-6">{{ __('Protocols Report') }}</x-heading>
+        
+        <!-- Encabezado de impresión -->
+        <x-print-header title="Protocols Report" />
+
+        <div class="flex justify-between items-center mb-6 no-print">
+            <x-heading level="h1" class="mb-0">{{ __('Protocols Report') }}</x-heading>
+            
+            <button onclick="printReport('{{ route('reports.print', 'protocols') }}')" class="bg-gray-800 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-900 transition shadow-sm flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                {{ __('Export to PDF') }}
+            </button>
+        </div>
 
         <div class="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200">
@@ -46,7 +57,11 @@
                     @endforelse
                 </tbody>
             </table>
-            <div class="px-6 py-4 border-t border-gray-200">{{ $projects->links() }}</div>
+            @if(!request()->has('export'))
+                <div class="px-6 py-4 border-t border-gray-200">
+                    {{ $projects->links() }}
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

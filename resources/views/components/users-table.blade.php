@@ -93,13 +93,24 @@
                     <!-- Botones de Acción Dinámicos -->
                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                         @if($showApproval && $user->status_id === UserStatus::PENDING->value)
-                            <!-- Botón de Aprobar (Solo para estudiantes pendientes) -->
-                            <form action="{{ route($routePrefix . '.approve', $user->id) }}" method="POST" class="inline-block">
-                                @csrf
-                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors shadow-sm">
-                                    {{ __('Approve') }}
-                                </button>
-                            </form>
+                            <!-- Botones de Aprobar/Rechazar (Solo para estudiantes pendientes) -->
+                            <div class="flex items-center justify-center space-x-2">
+                                <!-- Aprobar -->
+                                <form action="{{ route($routePrefix . '.approve', $user->id) }}" method="POST" class="inline-block">
+                                    @csrf
+                                    <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors shadow-sm">
+                                        {{ __('Approve') }}
+                                    </button>
+                                </form>
+
+                                <!-- Rechazar -->
+                                <form action="{{ route($routePrefix . '.reject', $user->id) }}" method="POST" class="inline-block">
+                                    @csrf
+                                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors shadow-sm">
+                                        {{ __('Reject') }}
+                                    </button>
+                                </form>
+                            </div>
                         @else
                             <!-- Botones de Editar y Eliminar -->
                             <div class="flex items-center justify-center space-x-3">

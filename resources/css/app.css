@@ -9,3 +9,47 @@
   --color-upta-700: #1d4ed8; /* Azul oscuro para hover */
   --color-upta-900: #1e3a8a; /* Azul muy oscuro para textos o navbar */
 }
+
+/* Estilos para impresión de reportes */
+@media print {
+    /* Ocultar elementos de navegación y botones */
+    nav, aside, header, .no-print {
+        display: none !important;
+    }
+    
+    /* Ajustar el cuerpo y fondo */
+    body {
+        background-color: white !important;
+        font-size: 12px;
+    }
+
+    /* Hacer que el contenido principal ocupe todo el ancho */
+    main {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+    }
+
+    /* Quitar sombras y bordes redondeados de las tablas para ahorrar tinta */
+    .bg-white, .shadow-md, .rounded-lg {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+
+    /* Evitar que las filas de la tabla se corten entre páginas */
+    tr {
+        page-break-inside: avoid;
+    }
+
+    /* Mostrar solo en impresión */
+    .print-only {
+        display: block !important;
+    }
+}
+
+/* Ocultar por defecto los elementos de impresión */
+.print-only {
+    display: none;
+}
