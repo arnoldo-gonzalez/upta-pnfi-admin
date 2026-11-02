@@ -3,7 +3,7 @@ name: Deploy Laravel via SSH and Rsync
 on:
   push:
     branches:
-      - master
+      - main # Cambia esto por 'master' si es el nombre de tu rama principal
 
 jobs:
   build-and-deploy:
@@ -17,7 +17,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4' # <-- Cambia esto por tu versión de PHP (ej. 8.1, 8.3)
+          php-version: '8.4' 
           extensions: mbstring, xml, ctype, iconv, mysql, zip, bcmath
           coverage: none
 
@@ -26,70 +26,58 @@ jobs:
         run: |
           composer install --no-ansi --no-dev --no-interaction --no-plugins --no-progress --no-scripts --optimize-autoloader
 
-      # 3. COMPILACIÓN FRONTEND (Opcional): Descomenta si usas Vite o Mix
-      - name: Instalar Node.js y compilar Assets
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Build Assets
-        run: |
-          npm install
-          npm run build
-
-      # 4. Validar formato de la Clave SSH antes de conectar
+      # 3. Validar formato de la Clave SSH antes de proceder
       - name: Validar formato del secreto SSH
         run: |
-          # Creamos un archivo temporal con el secreto
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/ssh_key
-          
-          # Forzamos saltos de línea estilo Linux y eliminamos espacios en blanco rebeldes
-          sed -i 's/\r$//' /tmp/ssh_key
-          chmod 600 /tmp/ssh_key
-          
-          ssh-keygen -l -f /tmp/ssh_key
+          ssh-keygen -l -f <(echo "${{ secrets.SSH_PRIVATE_KEY }}")
 
-      # 5. Preparar SSH y desplegar con Rsync
-      - name: Desplegar a Producción usando Rsync
+      # 4. Desplegar con Rsync y Optimizar Laravel (TODO EN UNO)
+      - name: Desplegar y Optimizar Aplicación
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          # Iniciar agente SSH e inyectar clave privada
+          # Inicializar agente SSH e inyectar la clave privada
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
           
-          # Registrar el servidor en known_hosts para evitar bloqueos
+          # Registrar el servidor en known_hosts para evitar bloqueos de conexión
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
           
-          # Ejecutar Rsync optimizado para Laravel
+          # Asegurar de forma remota que la estructura de carpetas destino exista en el servidor
+          ssh -o IdentitiesOnly=yes "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" "mkdir -p ~/www/uptamcy/"
+
+          # Ejecutar Rsync apuntando a la nueva subcarpeta ~/www/uptamcy/
           rsync -avz \
+            -e "ssh -o IdentitiesOnly=yes" \
+            --no-perms --no-owner --no-group \
             --delete \
             --exclude='.git/' \
             --exclude='.github/' \
             --exclude='node_modules/' \
             --exclude='.env' \
+            --exclude='.ssh/' \
             --exclude='storage/logs/*' \
             --exclude='storage/framework/sessions/*' \
             . "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}":~/www/uptamcy/
+
+          # Conectarse vía SSH para ejecutar comandos de producción dentro de la ruta correcta
+          ssh -o IdentitiesOnly=yes "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" << 'EOF'
+            # Entramos a la carpeta del proyecto Laravel
+            cd ~/www/uptamcy/
             
-      # 6. Comandos Post-Despliegue en el Servidor
-      - name: Optimizar Laravel en el Servidor
-        env:
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-        run: |
-          # Aseguramos que el agente SSH tenga acceso a la sesión para este paso
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
-
-          # Conectamos y ejecutamos los comandos línea por línea usando '\'
-          ssh "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
-            "cd /var/www/my-laravel-app && \
-             php artisan down && \
-             php artisan migrate --force && \
-             php artisan config:cache && \
-             php artisan route:cache && \
-             php artisan view:cache && \
-             php artisan up"
-
-          
+            # 1. Activar modo mantenimiento
+            php artisan down
+            
+            # 2. Correr migraciones de Base de Datos sin confirmación interactiva
+            php artisan migrate --force
+            
+            # 3. Limpiar y recrear las cachés de configuración y rutas para máximo rendimiento
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            
+            # 4. Volver a encender la aplicación (Fin del mantenimiento)
+            php artisan up
+          EOF
