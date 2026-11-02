@@ -26,10 +26,17 @@ jobs:
         run: |
           composer install --no-ansi --no-dev --no-interaction --no-plugins --no-progress --no-scripts --optimize-autoloader
 
-      # 3. Validar formato de la Clave SSH antes de proceder
+      # 3. Validar formato de la Clave SSH antes de conectar
       - name: Validar formato del secreto SSH
         run: |
-          ssh-keygen -l -f <(echo "${{ secrets.SSH_PRIVATE_KEY }}")
+          # Creamos un archivo temporal con el secreto
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/ssh_key
+          
+          # Forzamos saltos de línea estilo Linux y eliminamos espacios en blanco rebeldes
+          sed -i 's/\r$//' /tmp/ssh_key
+          chmod 600 /tmp/ssh_key
+          
+          ssh-keygen -l -f /tmp/ssh_key
 
       # 4. Desplegar con Rsync y Optimizar Laravel (TODO EN UNO)
       - name: Desplegar y Optimizar Aplicación
