@@ -3,7 +3,7 @@ name: Deploy Laravel via SSH and Rsync
 on:
   push:
     branches:
-      - main # Cambia esto por 'master' si es el nombre de tu rama principal
+      - master # Cambia esto por 'master' si es el nombre de tu rama principal
 
 jobs:
   build-and-deploy:
