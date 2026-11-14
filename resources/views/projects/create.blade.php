@@ -8,7 +8,6 @@
         </div>
 
         <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200">
-            <!-- Quitamos el enctype porque ya no subiremos archivos aquí -->
             <form action="{{ route('projects.store') }}" method="POST">
                 @csrf
 
@@ -18,6 +17,21 @@
                     <input type="text" name="title" value="{{ old('title') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" required>
                     @error('title') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
+
+                <!-- Eje Temático (Informativo) -->
+                @if(isset($thematicAxis))
+                <div class="mb-4 bg-upta-50 border border-upta-200 p-4 rounded-md flex items-start">
+                    <svg class="w-5 h-5 text-upta-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <h4 class="text-sm font-bold text-upta-900">{{ __('Thematic Axis:') }} {{ $thematicAxis->name }}</h4>
+                        <p class="text-xs text-upta-700 mt-1">
+                            {{ __('Your project must strictly align with this thematic axis based on your academic year. The investigation lines below are restricted to this framework.') }}
+                        </p>
+                    </div>
+                </div>
+                @endif
 
                 <!-- Línea de Investigación -->
                 <div class="mb-4">

@@ -432,5 +432,14 @@
 
     "Export to PDF": "Exportar a PDF",
     "Students Report": "Reporte de Estudiantes",
-    "Teachers Report": "Reporte de Docentes"
+    "Teachers Report": "Reporte de Docentes",
+
+    "Trayecto 1 students do not require an academic tutor. Your subject teacher will guide you.": "Los estudiantes del Trayecto 1 no requieren tutor académico. Tu profesor de la materia te guiará.",
+    "Soporte Técnico y Atención al Usuario": "Soporte Técnico y Atención al Usuario",
+    "Soluciones Informáticas": "Soluciones Informáticas",
+    "Gestión e Implantación de Software": "Gestión e Implantación de Software",
+    "The selected investigation line does not belong to your academic year.": "La línea de investigación seleccionada no pertenece a tu año académico.",
+    "Thematic Axis:": "Eje Temático:",
+
+    "Your project must strictly align with this thematic axis based on your academic year. The investigation lines below are restricted to this framework.": "Tu proyecto debe alinearse estrictamente con este eje temático según tu año académico. Las líneas de investigación mostradas a continuación están restringidas a este marco."
 }

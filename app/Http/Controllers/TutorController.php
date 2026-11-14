@@ -77,9 +77,13 @@ class TutorController extends Controller
         $availableTeachers = collect();
         $tutorLogs = collect();
 
-        if ($project) {
+        if ($project && $project->section->trayecto->number !== 1) {
+
             // 1. Si el proyecto está aprobado, la sección abierta y NO tiene tutor aceptado, mostramos la lista de docentes
-            if ($project->status_id === UserStatus::ACTIVE->value && $project->section->is_active && $project->tutor_request_status_id !== TutorRequestStatus::ACCEPTED->value) {
+            if ($project->status_id === UserStatus::ACTIVE->value 
+                && $project->section->is_active 
+                && $project->tutor_request_status_id !== TutorRequestStatus::ACCEPTED->value
+            ) {
                 $availableTeachers = User::role('docente')
                     ->where('status_id', UserStatus::ACTIVE->value)
                     ->orderBy('name')
@@ -90,6 +94,7 @@ class TutorController extends Controller
             if ($project->tutor_request_status_id === TutorRequestStatus::ACCEPTED->value) {
                 $tutorLogs = $project->tutorLogs()->orderBy('meeting_date', 'desc')->get();
             }
+            
         }
 
         return view('tutors.student.index', compact('project', 'availableTeachers', 'tutorLogs'));
@@ -97,6 +102,10 @@ class TutorController extends Controller
 
     public function request(Request $request, Project $project)
     {
+        if ($project->section->trayecto->number == 1) {
+            return back()->with('error', __('Trayecto 1 students do not require an academic tutor.'));
+        }
+
         $request->validate(['tutor_id' => ['required', 'exists:users,id']]);
 
         // 1. El proyecto debe estar aprobado

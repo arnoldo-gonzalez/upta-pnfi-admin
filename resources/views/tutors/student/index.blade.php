@@ -10,6 +10,11 @@
             <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
                 <p class="text-gray-500">{{ __('You do not have an active project yet.') }}</p>
             </div>
+        @elseif($project->section->trayecto->number === 1)
+            <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6 mt-6">
+                <h3 class="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{{ __('Academic Tutor') }}</h3>
+                <p class="text-sm text-gray-500">{{ __('Trayecto 1 students do not require an academic tutor. Your subject teacher will guide you.') }}</p>
+            </div>
         @else
             <!-- SECCIÓN 1: Estado del Tutor -->
             <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6 mb-6">

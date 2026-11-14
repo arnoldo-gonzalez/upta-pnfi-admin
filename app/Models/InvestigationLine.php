@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name'])]
+#[Fillable(['name', 'thematic_axis_id'])]
 class InvestigationLine extends Model
 {
     use HasFactory;
@@ -15,5 +15,9 @@ class InvestigationLine extends Model
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
+    }
+
+    public function thematicAxis() { 
+        return $this->belongsTo(ThematicAxis::class); 
     }
 }

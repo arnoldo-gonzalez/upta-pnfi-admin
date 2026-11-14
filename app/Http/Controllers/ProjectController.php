@@ -97,18 +97,24 @@ class ProjectController extends Controller
 
     public function create()
     {
-        $investigationLines = InvestigationLine::all();
-        return view('projects.create', compact('investigationLines'));
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $enrollment = $user->enrollments()->where('is_active', true)->first();
+
+        if (!$enrollment) {
+            return redirect()->route('dashboard')->with('error', __('You do not have an active enrollment.'));
+        }
+
+        $trayecto = $enrollment->section->trayecto;
+        $thematicAxis = $trayecto->thematicAxes()->first();
+
+        $investigationLines = $thematicAxis ? $thematicAxis->investigationLines : collect();
+        
+        return view('projects.create', compact('investigationLines', 'thematicAxis'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'investigation_line_id' => ['required', 'exists:investigation_lines,id'],
-            'justification' => ['required', 'string'],
-        ]);
-
         $enrollment = auth()->user()->enrollments()->where('is_active', true)->first();
 
         if (!$enrollment) {
@@ -118,6 +124,22 @@ class ProjectController extends Controller
         if (!$enrollment->section->is_active) {
             return back()->with('error', __('You cannot create a project in a closed section.'));
         }
+
+        $trayectoId = $enrollment->section->trayecto_id;
+        $isValidLine = InvestigationLine::where('id', $request->investigation_line_id)
+            ->whereHas('thematicAxis', function($q) use ($trayectoId) {
+                $q->where('trayecto_id', $trayectoId);
+            })->exists();
+
+        if (!$isValidLine) {
+            return back()->with('error', __('The selected investigation line does not belong to your academic year.'));
+        }
+
+        $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'investigation_line_id' => ['required'],
+            'justification' => ['required', 'string'],
+        ]);
 
         DB::transaction(function () use ($request, $enrollment) {
             

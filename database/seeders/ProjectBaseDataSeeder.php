@@ -6,6 +6,8 @@ use Illuminate\Database\Seeder;
 use App\Models\DocumentType;
 use App\Models\EvaluationStage;
 use App\Models\InvestigationLine;
+use App\Models\ThematicAxis;
+use App\Models\Trayecto;
 use App\Models\TutorRequestStatus;
 
 class ProjectBaseDataSeeder extends Seeder
@@ -23,10 +25,27 @@ class ProjectBaseDataSeeder extends Seeder
         EvaluationStage::firstOrCreate(['name' => 'Predefensa']);
         EvaluationStage::firstOrCreate(['name' => 'Defensa Final']);
 
-        // 3. Líneas de investigación
-        InvestigationLine::firstOrCreate(['name' => 'Desarrollo de Software']);
-        InvestigationLine::firstOrCreate(['name' => 'Infraestructura y Redes']);
-        InvestigationLine::firstOrCreate(['name' => 'Software Educativo']);
+        $trayectos = Trayecto::all();
+
+        foreach ($trayectos as $trayecto) {
+            if ($trayecto->number == 1) {
+                $eje = ThematicAxis::firstOrCreate(['name' => 'Soporte Técnico y Atención al Usuario', 'trayecto_id' => $trayecto->id]);
+                InvestigationLine::firstOrCreate(['name' => 'Mantenimiento de Equipos', 'thematic_axis_id' => $eje->id]);
+                InvestigationLine::firstOrCreate(['name' => 'Reparación de Hardware', 'thematic_axis_id' => $eje->id]);
+            } elseif ($trayecto->number == 2) {
+                $eje = ThematicAxis::firstOrCreate(['name' => 'Desarrollo de Software y Redes', 'trayecto_id' => $trayecto->id]);
+                InvestigationLine::firstOrCreate(['name' => 'Desarrollo Web', 'thematic_axis_id' => $eje->id]);
+                InvestigationLine::firstOrCreate(['name' => 'Redes', 'thematic_axis_id' => $eje->id]);
+            } elseif ($trayecto->number == 3) {
+                $eje = ThematicAxis::firstOrCreate(['name' => 'Desarrollo de Soluciones Informáticas', 'trayecto_id' => $trayecto->id]);
+                InvestigationLine::firstOrCreate(['name' => 'Software a Medida', 'thematic_axis_id' => $eje->id]);
+                InvestigationLine::firstOrCreate(['name' => 'Aplicaciones Móviles', 'thematic_axis_id' => $eje->id]);
+            } elseif ($trayecto->number == 4) {
+                $eje = ThematicAxis::firstOrCreate(['name' => 'Gestión e Implantación del Software', 'trayecto_id' => $trayecto->id]);
+                InvestigationLine::firstOrCreate(['name' => 'Implantación de Sistemas', 'thematic_axis_id' => $eje->id]);
+                InvestigationLine::firstOrCreate(['name' => 'Auditoría de Software', 'thematic_axis_id' => $eje->id]);
+            }
+        }
 
         // 4. Estados de la solicitud de tutoría
         TutorRequestStatus::firstOrCreate(['id' => 1, 'name' => 'sin_solicitud']);

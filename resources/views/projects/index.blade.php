@@ -344,14 +344,21 @@
                         </div>
                     @endif
 
-                    <!-- Enlace al Módulo de Tutor -->
-                    <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6">
-                        <h3 class="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{{ __('Academic Tutor') }}</h3>
-                        <p class="text-xs text-gray-600 mb-4">{{ __('Manage your tutor request and view your tutoring logbook.') }}</p>
-                        <a href="{{ route('tutors.student.index') }}" class="block text-center w-full bg-upta-50 text-upta-700 border border-upta-200 text-sm font-semibold px-4 py-2 rounded hover:bg-upta-100 transition">
-                            {{ __('Go to My Tutor') }}
-                        </a>
-                    </div>
+                    <!-- GESTIÓN DE TUTOR -->
+                    @if($project->section->trayecto->number === 1)
+                        <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6 mt-6">
+                            <h3 class="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{{ __('Academic Tutor') }}</h3>
+                            <p class="text-sm text-gray-500">{{ __('Trayecto 1 students do not require an academic tutor. Your subject teacher will guide you.') }}</p>
+                        </div>
+                    @elseif($project->status_id === \App\Enums\UserStatus::ACTIVE->value)
+                        <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6">
+                            <h3 class="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{{ __('Academic Tutor') }}</h3>
+                            <p class="text-xs text-gray-600 mb-4">{{ __('Manage your tutor request and view your tutoring logbook.') }}</p>
+                            <a href="{{ route('tutors.student.index') }}" class="block text-center w-full bg-upta-50 text-upta-700 border border-upta-200 text-sm font-semibold px-4 py-2 rounded hover:bg-upta-100 transition">
+                                {{ __('Go to My Tutor') }}
+                            </a>
+                        </div>
+                    @endif
 
                 </div>
             </div>
