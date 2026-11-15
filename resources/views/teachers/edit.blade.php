@@ -47,6 +47,12 @@
                     @error('password') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     <p class="text-xs text-gray-500 mt-1">{{ __('Leave blank if you do not want to change the current password.') }}</p>
                 </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700">{{ __('Max Tutored Projects') }}</label>
+                    <input type="number" name="max_tutored_projects" value="{{ old('max_tutored_projects', $teacher->max_tutored_projects) }}" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" required>
+                    @error('max_tutored_projects') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
 
                 <div class="flex justify-end">
                     <button type="submit" class="bg-upta-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-upta-700 transition shadow-sm">

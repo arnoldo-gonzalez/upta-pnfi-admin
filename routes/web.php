@@ -33,6 +33,16 @@ Route::middleware(['auth'/* , 'verified' */])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
+
+});
+
+Route::middleware(['auth', 'role:admin|estudiante'])->group(function () {
+
+    Route::post('/projects/{project}/request-tutor', [TutorController::class, 'request'])->name('tutors.request');
+    Route::get('/tutor-logs/{log}/download', [TutorLogController::class, 'downloadLog'])->name('tutor-logs.download');
+
     Route::post('/projects/invite', [ProjectInvitationController::class, 'store'])->name('projects.invite');
     Route::post('/invitations/{invitation}/accept', [ProjectInvitationController::class, 'accept'])->name('invitations.accept');
     Route::post('/invitations/{invitation}/reject', [ProjectInvitationController::class, 'reject'])->name('invitations.reject');
@@ -43,18 +53,6 @@ Route::middleware(['auth'/* , 'verified' */])->group(function () {
     Route::post('/projects/{project}/submit-protocol', [ProjectController::class, 'submitProtocol'])->name('projects.submitProtocol');
     Route::post('/projects/{project}/logs', [TutorLogController::class, 'store'])->name('tutor-logs.store');
     Route::get('/my-tutor', [TutorController::class, 'studentIndex'])->name('tutors.student.index');
-
-    Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
-
-    // Estudiante
-    Route::post('/projects/{project}/request-tutor', [TutorController::class, 'request'])->name('tutors.request');
-    
-    // Docente
-    Route::get('/my-tutor-requests', [TutorController::class, 'index'])->name('tutors.index');
-    Route::post('/tutor-requests/{project}/accept', [TutorController::class, 'accept'])->name('tutors.accept');
-    Route::post('/tutor-requests/{project}/reject', [TutorController::class, 'reject'])->name('tutors.reject');
-    Route::get('/tutor-logs/{log}/download', [TutorLogController::class, 'downloadLog'])->name('tutor-logs.download');
 
 });
 
@@ -85,12 +83,20 @@ Route::middleware(['auth', 'role:admin|coordinador'])->group(function () {
 
     Route::get('/coordinator/protocols', [ProjectController::class, 'protocols'])->name('coordinator.protocols');
     Route::get('/coordinator/tutorships', [ProjectController::class, 'tutorships'])->name('coordinator.tutorships');
+    Route::get('/coordinator/assign-tutors', [TutorController::class, 'assignDashboard'])->name('coordinator.assignTutors');
+    Route::post('/coordinator/assign-tutors/{project}', [TutorController::class, 'manualAssign'])->name('coordinator.manualAssign');
+    Route::post('/coordinator/calculate-quota', [TutorController::class, 'calculateFairQuota'])->name('coordinator.calculateQuota');
 
     Route::resource('events', EventController::class)->except(['show', 'edit', 'update']);
 
 });
 
 Route::middleware(['auth', 'role:admin|docente'])->group(function () {
+
+    Route::get('/my-tutor-requests', [TutorController::class, 'index'])->name('tutors.index');
+    Route::post('/tutor-requests/{project}/accept', [TutorController::class, 'accept'])->name('tutors.accept');
+    Route::post('/tutor-requests/{project}/reject', [TutorController::class, 'reject'])->name('tutors.reject');
+    Route::post('/my-tutor-requests/increase-capacity', [TutorController::class, 'increaseCapacity'])->name('tutors.increaseCapacity');
 
     Route::get('/my-evaluations/history', [EvaluationController::class, 'historyIndex'])->name('evaluations.teacher.history');
     Route::get('/my-evaluations/history/{project}', [EvaluationController::class, 'historyShow'])->name('evaluations.teacher.history.show');

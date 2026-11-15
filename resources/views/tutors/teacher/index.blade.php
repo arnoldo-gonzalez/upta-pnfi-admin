@@ -2,6 +2,22 @@
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <x-heading level="h1">{{ __('Tutoring Requests') }}</x-heading>
 
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+            <div class="mb-4 md:mb-0">
+                <x-heading level="h1" class="mb-0">{{ __('Tutoring Requests') }}</x-heading>
+                <p class="text-sm text-gray-500 mt-1">
+                    {{ __('Current capacity:') }} <strong>{{ auth()->user()->max_tutored_projects - auth()->user()->availableTutorSlots() }} / {{ auth()->user()->max_tutored_projects }}</strong>
+                </p>
+            </div>
+            
+            <form action="{{ route('tutors.increaseCapacity') }}" method="POST">
+                @csrf
+                <button type="submit" class="bg-upta-50 text-upta-700 border border-upta-200 px-4 py-2 rounded-md text-sm font-semibold hover:bg-upta-100 transition">
+                    {{ __('Increase My Capacity') }}
+                </button>
+            </form>
+        </div>
+
         <div class="mt-6 grid grid-cols-1 gap-6">
             @forelse($requests as $project)
                 <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center">

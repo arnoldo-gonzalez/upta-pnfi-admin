@@ -441,5 +441,36 @@
     "The selected investigation line does not belong to your academic year.": "La línea de investigación seleccionada no pertenece a tu año académico.",
     "Thematic Axis:": "Eje Temático:",
 
-    "Your project must strictly align with this thematic axis based on your academic year. The investigation lines below are restricted to this framework.": "Tu proyecto debe alinearse estrictamente con este eje temático según tu año académico. Las líneas de investigación mostradas a continuación están restringidas a este marco."
+    "Your project must strictly align with this thematic axis based on your academic year. The investigation lines below are restricted to this framework.": "Tu proyecto debe alinearse estrictamente con este eje temático según tu año académico. Las líneas de investigación mostradas a continuación están restringidas a este marco.",
+
+    "The selected teacher has reached their maximum tutoring capacity.": "El docente seleccionado ha alcanzado su capacidad máxima de tutorías.",
+    "There are no unassigned projects to distribute.": "No hay proyectos sin asignar para distribuir.",
+    ":count projects were automatically assigned to teachers.": ":count proyectos fueron asignados automáticamente a los docentes.",
+    "Auto-Assign Tutors": "Asignar Tutores Automáticamente",
+    "This will distribute all unassigned projects among teachers with available slots. Do you want to proceed?": "Esto distribuirá todos los proyectos sin asignar entre los docentes con cupos disponibles. ¿Deseas continuar?",
+    "Auto-Assign": "Asignar Automáticamente",
+    "Max Tutored Projects": "Máximo de Proyectos Tutorados",
+
+    "Not enough projects or teachers to calculate a fair quota.": "No hay suficientes proyectos o docentes para calcular una cuota justa.",
+    "Fair quota calculated and applied: :quota projects per teacher.": "Cuota justa calculada y aplicada: :quota proyectos por docente.",
+    "Calculate Fair Quota": "Calcular Cuota Justa",
+    "This will calculate (Total Projects / Total Teachers) and update every teacher's maximum limit. Continue?": "Esto calculará (Total Proyectos / Total Docentes) y actualizará el límite máximo de cada docente. ¿Continuar?",
+    "Calculate": "Calcular",
+    "Your tutoring capacity has been increased by 1. You can now accept more students.": "Tu capacidad de tutoría ha aumentado en 1. Ahora puedes aceptar más estudiantes.",
+    "Current capacity:": "Capacidad actual:",
+    "Increase My Capacity": "Ampliar mi Capacidad",
+
+    "Assign Tutors": "Asignar Tutores",
+    "No projects with assigned tutors found.": "No se encontraron proyectos con tutores asignados.",
+    "Manually assign a tutor to projects that were not accepted during the 3-week period.": "Asigna manualmente un tutor a los proyectos que no fueron aceptados durante el periodo de 3 semanas.",
+    "Recalculate Quota": "Recalcular Cuota",
+    "This will divide the total unassigned projects by the total available teachers and set that as the new maximum limit for everyone. Continue?": "Esto dividirá el total de proyectos sin asignar entre el total de docentes disponibles y establecerá ese resultado como el nuevo límite máximo para todos. ¿Continuar?",
+    "Projects without Tutor": "Proyectos sin Tutor",
+    "Students:": "Estudiantes:",
+    "Select Teacher": "Seleccionar Docente",
+    "Slots:": "Cupos:",
+    "Assign": "Asignar",
+    "All projects have an assigned tutor.": "Todos los proyectos tienen un tutor asignado.",
+    "Teacher Capacities": "Capacidades de los Docentes",
+    "Tutor assigned successfully.": "Tutor asignado exitosamente."
 }

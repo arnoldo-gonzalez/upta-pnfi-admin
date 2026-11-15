@@ -13,7 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password','credential', 'phone', 'status_id'])]
+#[Fillable(['name', 'email', 'password','credential', 'phone', 'status_id', 'max_tutored_projects'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -72,5 +72,14 @@ class User extends Authenticatable
     public function uploadedDocuments()
     {
         return $this->hasMany(ProjectDocument::class, 'user_id');
+    }
+
+    public function availableTutorSlots()
+    {
+        $currentLoad = $this->tutoredProjects()
+            ->where('tutor_request_status_id', \App\Enums\TutorRequestStatus::ACCEPTED->value)
+            ->count();
+            
+        return $this->max_tutored_projects - $currentLoad;
     }
 }

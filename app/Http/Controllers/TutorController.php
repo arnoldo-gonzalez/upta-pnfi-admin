@@ -108,6 +108,12 @@ class TutorController extends Controller
 
         $request->validate(['tutor_id' => ['required', 'exists:users,id']]);
 
+        $teacher = User::find($request->tutor_id);
+        
+        if ($teacher->availableTutorSlots() <= 0) {
+            return back()->with('error', __('The selected teacher has reached their maximum tutoring capacity.'));
+        }
+
         // 1. El proyecto debe estar aprobado
         if ($project->status_id !== UserStatus::ACTIVE->value) {
             return back()->with('error', __('Your project must be approved before selecting a tutor.'));
@@ -146,5 +152,92 @@ class TutorController extends Controller
         foreach ($students as $projectStudent) {
             $projectStudent->enrollment->student->notify(new TutorResponse($title, $message));
         }
+    }
+
+    public function calculateFairQuota()
+    {
+        // 1. Contar proyectos que necesitan tutor (Aprobados, sin tutor, no Trayecto 1)
+        $totalProjects = Project::where('status_id', UserStatus::ACTIVE->value)
+            ->whereNull('tutor_id')
+            ->whereHas('section.trayecto', function($q) {
+                $q->where('number', '!=', 1);
+            })
+        ->count();
+
+        // 2. Contar docentes activos disponibles
+        $totalTeachers = User::role('docente')
+            ->where('status_id', UserStatus::ACTIVE->value)
+        ->count();
+
+        if ($totalTeachers === 0 || $totalProjects === 0) {
+            return back()->with('error', __('Not enough projects or teachers to calculate a fair quota.'));
+        }
+
+        // 3. Calcular la cuota (Redondeando hacia arriba para no dejar proyectos huérfanos)
+        $fairQuota = ceil($totalProjects / $totalTeachers);
+
+        // 4. Actualizar a todos los docentes con esta cuota
+        User::role('docente')->update(['max_tutored_projects' => $fairQuota]);
+
+        return back()->with('success', __('Fair quota calculated and applied: :quota projects per teacher.', ['quota' => $fairQuota]));
+    }
+
+    public function increaseCapacity()
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        
+        // Incrementamos su límite en 1 (o puedes poner un valor fijo como 5)
+        $user->increment('max_tutored_projects', 1);
+
+        return back()->with('success', __('Your tutoring capacity has been increased by 1. You can now accept more students.'));
+    }
+
+        // 1. Vista de la mesa de asignación para el coordinador
+    public function assignDashboard()
+    {
+        // Proyectos que necesitan tutor (Aprobados, sin tutor, no Trayecto 1)
+        $unassignedProjects = Project::with(['section.trayecto', 'students.enrollment.student'])
+            ->where('status_id', UserStatus::ACTIVE->value)
+            ->whereNull('tutor_id')
+            ->whereHas('section.trayecto', function($q) {
+                $q->where('number', '!=', 1);
+            })
+        ->get();
+
+        // Docentes con cupos disponibles
+        $teachers = User::role('docente')
+            ->where('status_id', UserStatus::ACTIVE->value)
+            ->get()
+        ->filter(function($teacher) {
+            return $teacher->availableTutorSlots() > 0;
+        });
+
+        return view('coordinator.assign-tutors', compact('unassignedProjects', 'teachers'));
+    }
+
+    // 2. Asignación manual hecha por el coordinador
+    public function manualAssign(Request $request, Project $project)
+    {
+        $request->validate([
+            'tutor_id' => ['required', 'exists:users,id']
+        ]);
+
+        $teacher = User::find($request->tutor_id);
+
+        // Verificar que el docente aún tenga cupo
+        if ($teacher->availableTutorSlots() <= 0) {
+            return back()->with('error', __('The selected teacher has reached their maximum capacity.'));
+        }
+
+        $project->update([
+            'tutor_id' => $teacher->id,
+            'tutor_request_status_id' => TutorRequestStatus::ACCEPTED->value
+        ]);
+
+        // Notificar al docente
+        $teacher->notify(new TutorRequested($project));
+
+        return back()->with('success', __('Tutor assigned successfully.'));
     }
 }
