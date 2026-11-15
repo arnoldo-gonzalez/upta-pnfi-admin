@@ -10,7 +10,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'title', 'code', 'investigation_line_id', 'justification', 'status_id', 
-    'section_id', 'tutor_id', 'tutor_request_status_id'
+    'section_id', 'section_teacher_id',
+    'allow_late_submission',
+    'tutor_id', 'tutor_request_status_id',
+    'written_score', 'technical_score', 'tutor_evaluation_status_id'
 ])]
 class Project extends Model
 {
@@ -35,6 +38,15 @@ class Project extends Model
     
     public function documents(): HasMany { 
         return $this->hasMany(ProjectDocument::class); 
+    }
+
+    public function evaluationScores()
+    {
+        return $this->hasMany(ProjectEvaluationScore::class);
+    }
+
+    public function tutorEvaluationStatus() {
+        return $this->belongsTo(Status::class, 'tutor_evaluation_status_id');
     }
 
     public function evaluations(): HasMany { 

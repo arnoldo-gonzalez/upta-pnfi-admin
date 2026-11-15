@@ -17,5 +17,6 @@ class StatusSeeder extends Seeder
         Status::firstOrCreate(['id' => 3, 'name' => 'rejected']);
         Status::firstOrCreate(['id' => 4, 'name' => 'borrador']);
         Status::firstOrCreate(['id' => 5, 'name' => 'needs_corrections']);
+        Status::firstOrCreate(['id' => 6, 'name' => 'ready_for_experts']);
     }
 }

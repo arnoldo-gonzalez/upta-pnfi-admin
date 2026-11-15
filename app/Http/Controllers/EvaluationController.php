@@ -18,17 +18,27 @@ class EvaluationController extends Controller
 
     public function index()
     {
-        // Proyectos que están esperando ser evaluados (Estado Pendiente)
-        $projects = Project::with(['section.trayecto', 'investigationLine'])
-            ->where('status_id', UserStatus::PENDING->value)
-            ->orderBy('created_at', 'asc')
-            ->paginate(10);
+        $user = auth()->user();
+        
+        $query = Project::with(['section.trayecto', 'investigationLine'])
+            ->where('status_id', UserStatus::PENDING->value);
+
+        // Si es docente (asesor), solo ve los proyectos de su sección
+        if ($user->hasRole('docente')) {
+            $query->whereHas('section.activeTeacher', function($q) use ($user) {
+                $q->where('users.id', $user->id);
+            });
+        }
+
+        $projects = $query->orderBy('created_at', 'asc')->paginate(10);
 
         return view('evaluations.coordinator.index', compact('projects'));
     }
 
     public function assignForm(Project $project)
     {
+        $this->authorizeAssignment($project);
+
         // Traemos a todos los docentes disponibles
         $teachers = User::role('docente')->orderBy('name')->get();
 
@@ -44,6 +54,8 @@ class EvaluationController extends Controller
 
     public function assign(Request $request, Project $project)
     {
+        $this->authorizeAssignment($project);
+
         $request->validate(['teachers' => ['required', 'array', 'min:1']]);
         $protocolStage = EvaluationStage::where('name', 'Protocolo')->first();
 
@@ -150,6 +162,30 @@ class EvaluationController extends Controller
         });
 
         return redirect()->route('evaluations.teacher.index')->with('success', __('Evaluation submitted successfully.'));
+    }
+
+        /**
+     * Verifica si el usuario actual puede asignar evaluadores a este proyecto.
+     */
+    private function authorizeAssignment(Project $project)
+    {
+        $user = auth()->user();
+
+        // Coordinadores y admins tienen vía libre
+        if ($user->hasAnyRole(['admin', 'coordinador'])) {
+            return;
+        }
+
+        // Si es docente, validar que sea el asesor de la sección de este proyecto
+        if ($user->hasRole('docente')) {
+            $activeAdvisor = $project->section->activeTeacher->first();
+            
+            if ($activeAdvisor && $activeAdvisor->id === $user->id) {
+                return;
+            }
+        }
+
+        abort(403, 'No tienes permiso para asignar evaluadores a este proyecto.');
     }
 
     public function historyIndex() {

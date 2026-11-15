@@ -11,19 +11,27 @@ use App\Models\ProjectStudent;
 use Illuminate\Http\Request;
 use App\Notifications\TutorRequested;
 use App\Notifications\TutorResponse;
+use Illuminate\Support\Facades\DB;
 
 class TutorController extends Controller
 {
     // --- VISTAS DEL DOCENTE ---
     public function index()
     {
+        // 1. Solicitudes pendientes
         $requests = Project::with(['section.trayecto', 'investigationLine', 'students.enrollment.student'])
             ->where('tutor_id', auth()->id())
             ->where('tutor_request_status_id', TutorRequestStatus::PENDING->value)
             ->orderBy('updated_at', 'desc')
-            ->paginate(10);
+        ->paginate(10); // O get() si prefieres no paginar
 
-        return view('tutors.teacher.index', compact('requests'));
+        $activeProjects = Project::with(['section.trayecto', 'investigationLine'])
+            ->where('tutor_id', auth()->id())
+            ->where('tutor_request_status_id', TutorRequestStatus::ACCEPTED->value)
+            ->orderBy('updated_at', 'desc')
+        ->get();
+
+        return view('tutors.teacher.index', compact('requests', 'activeProjects'));
     }
 
     public function accept(Project $project)
@@ -58,7 +66,6 @@ class TutorController extends Controller
 
     public function studentIndex()
     {
-        /** @var \App\Models\User $user */
         $user = auth()->user();
 
         if (!$user->hasRole('estudiante')) {
@@ -70,32 +77,39 @@ class TutorController extends Controller
         if (!$enrollment) {
             return redirect()->route('dashboard')->with('error', __('You do not have an active enrollment.'));
         }
-        
-        // Buscamos el proyecto del estudiante
+
         $projectStudent = ProjectStudent::where('enrollment_id', $enrollment->id)->first();
         $project = $projectStudent ? $projectStudent->project : null;
 
         $availableTeachers = collect();
         $tutorLogs = collect();
 
-        if ($project && $project->section->trayecto->number !== 1) {
+        if ($project) {
+            if ($project->status_id === UserStatus::ACTIVE->value && $project->section->is_active && $project->tutor_request_status_id !== TutorRequestStatus::ACCEPTED->value) {
+                
+                // 1. Buscamos quién es el asesor actual de la sección
+                $advisorSectionTeacherId = $project->section_teacher_id;
+                $advisorUserId = null;
+                
+                if ($advisorSectionTeacherId) {
+                    $advisorUserId = DB::table('section_teacher')
+                        ->where('id', $advisorSectionTeacherId)
+                    ->value('user_id');
+                }
 
-            // 1. Si el proyecto está aprobado, la sección abierta y NO tiene tutor aceptado, mostramos la lista de docentes
-            if ($project->status_id === UserStatus::ACTIVE->value 
-                && $project->section->is_active 
-                && $project->tutor_request_status_id !== TutorRequestStatus::ACCEPTED->value
-            ) {
+                // 2. Traemos a los docentes EXCLUYENDO al asesor
                 $availableTeachers = User::role('docente')
                     ->where('status_id', UserStatus::ACTIVE->value)
+                    ->when($advisorUserId, function($query) use ($advisorUserId) {
+                        return $query->where('id', '!=', $advisorUserId);
+                    })
                     ->orderBy('name')
-                    ->get();
+                ->get();
             }
 
-            // 2. Si ya tiene tutor aceptado, cargamos la bitácora
             if ($project->tutor_request_status_id === TutorRequestStatus::ACCEPTED->value) {
                 $tutorLogs = $project->tutorLogs()->orderBy('meeting_date', 'desc')->get();
             }
-            
         }
 
         return view('tutors.student.index', compact('project', 'availableTeachers', 'tutorLogs'));
@@ -131,10 +145,10 @@ class TutorController extends Controller
 
         // 3. El Asesor NO puede ser el Tutor
         $advisorId = $project->section_teacher_id;
-        $isAdvisor = \Illuminate\Support\Facades\DB::table('section_teacher')
+        $isAdvisor = DB::table('section_teacher')
             ->where('id', $advisorId)
             ->where('user_id', $request->tutor_id)
-            ->exists();
+        ->exists();
 
         if ($isAdvisor) {
             return back()->with('error', __('The subject advisor cannot be selected as your project tutor.'));
@@ -189,7 +203,6 @@ class TutorController extends Controller
 
     public function increaseCapacity()
     {
-        /** @var \App\Models\User $user */
         $user = auth()->user();
         
         // Incrementamos su límite en 1 (o puedes poner un valor fijo como 5)

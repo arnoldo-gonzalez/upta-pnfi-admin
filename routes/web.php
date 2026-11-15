@@ -15,6 +15,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\TutorController;
+use App\Http\Controllers\TutorEvaluationController;
 use App\Http\Controllers\TutorLogController;
 use Illuminate\Support\Facades\Route;
 
@@ -59,14 +60,16 @@ Route::middleware(['auth', 'role:admin|estudiante'])->group(function () {
 
 });
 
+Route::middleware(['auth', 'role:admin|coordinador|docente'])->group(function () {
+    Route::get('/evaluations', [EvaluationController::class, 'index'])->name('evaluations.coordinator.index');
+    Route::post('/evaluations/{project}/assign', [EvaluationController::class, 'assign'])->name('evaluations.coordinator.assign.store');
+    Route::get('/evaluations/{project}/assign', [EvaluationController::class, 'assignForm'])->name('evaluations.coordinator.assign');
+});
+
 Route::middleware(['auth', 'role:admin|coordinador'])->group(function () {
 
     Route::get('/coordinator/late-requests', [LateSubmissionController::class, 'index'])->name('late-requests.index');
     Route::post('/coordinator/late-requests/{lateRequest}/review', [LateSubmissionController::class, 'review'])->name('late-requests.review');
-
-    Route::get('/evaluations', [EvaluationController::class, 'index'])->name('evaluations.coordinator.index');
-    Route::post('/evaluations/{project}/assign', [EvaluationController::class, 'assign'])->name('evaluations.coordinator.assign.store');
-    Route::get('/evaluations/{project}/assign', [EvaluationController::class, 'assignForm'])->name('evaluations.coordinator.assign');
 
     // Rutas para la gestión de secciones
     Route::get('/sections', [SectionController::class, 'index'])->name('sections.index');
@@ -112,6 +115,9 @@ Route::middleware(['auth', 'role:admin|docente'])->group(function () {
 
     Route::get('/my-evaluations/history', [EvaluationController::class, 'historyIndex'])->name('evaluations.teacher.history');
     Route::get('/my-evaluations/history/{project}', [EvaluationController::class, 'historyShow'])->name('evaluations.teacher.history.show');
+
+    Route::get('/projects/{project}/evaluate', [TutorEvaluationController::class, 'create'])->name('tutor-evaluations.create');
+    Route::post('/projects/{project}/evaluate', [TutorEvaluationController::class, 'store'])->name('tutor-evaluations.store');
 
 });
 

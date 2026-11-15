@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
             TrayectoSeeder::class,
             ProjectBaseDataSeeder::class,
             EventTypeSeeder::class,
+            CriteriaTypeSeeder::class,
+            EvaluationCriteriaSeeder::class
         ]);
     }
 }

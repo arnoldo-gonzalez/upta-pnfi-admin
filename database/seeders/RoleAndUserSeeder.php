@@ -71,6 +71,54 @@ class RoleAndUserSeeder extends Seeder
         );
         $docente->assignRole($docenteRole);
 
+        $docente_1 = User::firstOrCreate(
+            ['email' => 'docente_1@uptamcy.com'],
+            [
+                'name' => 'Docente_1 Tutor',
+                'password' => Hash::make('password'),
+                'credential' => '20000004',
+                'phone' => '04140000004',
+                'status_id' => UserStatus::ACTIVE->value,
+            ]
+        );
+        $docente_1->assignRole($docenteRole);
+
+        $docente_2 = User::firstOrCreate(
+            ['email' => 'docente_2@uptamcy.com'],
+            [
+                'name' => 'Docente_2 Tutor',
+                'password' => Hash::make('password'),
+                'credential' => '20000005',
+                'phone' => '04140000005',
+                'status_id' => UserStatus::ACTIVE->value,
+            ]
+        );
+        $docente_2->assignRole($docenteRole);
+
+        $docente_3 = User::firstOrCreate(
+            ['email' => 'docente_3@uptamcy.com'],
+            [
+                'name' => 'Docente_3 Tutor',
+                'password' => Hash::make('password'),
+                'credential' => '20000006',
+                'phone' => '04140000006',
+                'status_id' => UserStatus::ACTIVE->value,
+            ]
+        );
+        $docente_3->assignRole($docenteRole);
+
+        $docente_4 = User::firstOrCreate(
+            ['email' => 'docente_4@uptamcy.com'],
+            [
+                'name' => 'Docente_4 Tutor',
+                'password' => Hash::make('password'),
+                'credential' => '20000007',
+                'phone' => '04140000007',
+                'status_id' => UserStatus::ACTIVE->value,
+            ]
+        );
+        $docente_4->assignRole($docenteRole);
+
         // --- ESTUDIANTE ---
 
         for ($i = 0; $i <= 10; $i++) {

@@ -47,7 +47,7 @@
 
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700">{{ __('Max Tutored Projects') }}</label>
-                    <input type="number" name="max_tutored_projects" value="{{ old('max_tutored_projects', $teacher->max_tutored_projects) }}" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" required>
+                    <input type="number" name="max_tutored_projects" value="{{ old('max_tutored_projects', 5) }}" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" required>
                     @error('max_tutored_projects') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
 

@@ -515,5 +515,28 @@
     "Late Requests": "Solicitudes Extemporáneas",
     "You already have a pending request under review. Please wait for the coordination to respond.": "Ya tienes una solicitud pendiente en revisión. Por favor, espera a que la coordinación responda.",
     "Your late submission request has already been approved. You can proceed to upload your protocol.": "Tu solicitud de envío extemporáneo ya ha sido aprobada. Puedes proceder a subir tu protocolo.",
-    "Explain the reasons for the late submission...": "Explica los motivos del envío extemporáneo..."
+    "Explain the reasons for the late submission...": "Explica los motivos del envío extemporáneo...",
+
+    "Tutoring Dashboard": "Panel de Tutorías",
+    "Pending Requests": "Solicitudes Pendientes",
+    "My Active Projects": "Mis Proyectos en Tutoría",
+    "Pending Evaluation": "Evaluación Pendiente",
+    "Ready for Experts": "Listo para Jurados",
+    "Returned to Student": "Devuelto al Estudiante",
+    "Waiting for Student Submission": "Esperando Envío del Estudiante",
+    "You are not currently tutoring any projects.": "No estás tutorando ningún proyecto actualmente.",
+
+    "Evaluate Project": "Evaluar Proyecto",
+    "Note: For 3rd Year projects, the technical area requires a minimum of 95% to be approved.": "Nota: Para proyectos de 3er Año, el área técnica requiere un mínimo de 95% para ser aprobado.",
+    "Written Report (Min 80%)": "Informe Escrito (Mín 80%)",
+    "Technical Development": "Desarrollo Técnico",
+    "Save Evaluation": "Guardar Evaluación",
+    "No evaluation criteria defined for this thematic axis. Please contact the administrator.": "No hay criterios de evaluación definidos para este eje temático. Por favor, contacte al administrador.",
+    "Project evaluated successfully.": "Proyecto evaluado exitosamente.",
+    "Approved (Ready for Experts)": "Aprobado (Listo para Jurados)",
+    "In Tutoring Phase": "En Fase de Tutoría",
+
+    "The tutor request period has closed.": "El plazo para solicitar un tutor ya ha finalizado.",
+    
+    "No tienes permiso para asignar evaluadores a este proyecto.": "No tienes permiso para asignar evaluadores a este proyecto."
 }

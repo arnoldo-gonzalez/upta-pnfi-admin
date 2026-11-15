@@ -59,7 +59,6 @@
                 <div class="md:col-span-2 space-y-6">
 
                     <!-- Info del proyecto -->
-
                     <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6">
                         <div class="flex justify-between items-start mb-4">
                             <h2 class="text-2xl font-bold text-upta-900">{{ $project->title }}</h2>
@@ -70,11 +69,29 @@
                             @elseif($project->status_id === UserStatus::NEEDS_CORRECTIONS->value)
                                 <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">{{ __('Needs Corrections') }}</span>
                             @elseif($project->status_id === UserStatus::ACTIVE->value)
-                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">{{ __('Approved') }}</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">{{ __('In Tutoring Phase') }}</span>
+                            @elseif($project->status_id === UserStatus::READY_FOR_EXPERTS->value)
+                                <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold">{{ __('Ready for Experts') }}</span>
                             @endif
                         </div>
                         <p class="text-sm text-gray-600 mb-2"><strong>{{ __('Line:') }}</strong> {{ $project->investigationLine->name }}</p>
                         <p class="text-sm text-gray-600"><strong>{{ __('Justification:') }}</strong> {{ $project->justification }}</p>
+
+                        @if($project->tutor_evaluation_status_id !== UserStatus::PENDING->value && $project->tutor_evaluation_status_id !== null)
+                            <div class="mt-6 border-t border-gray-100 pt-4">
+                                <p class="text-sm font-bold text-gray-800 mb-3">{{ __('Tutor Evaluation Result') }}</p>
+                                <div class="flex space-x-4">
+                                    <div class="bg-gray-50 p-3 rounded border border-gray-200 flex-1">
+                                        <p class="text-xs text-gray-500">{{ __('Written Report') }}</p>
+                                        <p class="text-xl font-bold {{ $project->written_score >= 80 ? 'text-green-600' : 'text-red-600' }}">{{ $project->written_score }}%</p>
+                                    </div>
+                                    <div class="bg-gray-50 p-3 rounded border border-gray-200 flex-1">
+                                        <p class="text-xs text-gray-500">{{ __('Technical Dev') }}</p>
+                                        <p class="text-xl font-bold {{ $project->technical_score >= ($project->section->trayecto->number == 3 ? 95 : 80) ? 'text-green-600' : 'text-red-600' }}">{{ $project->technical_score }}%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Equipo -->
@@ -95,9 +112,7 @@
                         </ul>
                     </div>
 
-                    
-                    <!-- Correcciones -->
-
+                    <!-- Historial de Correcciones -->
                     @php
                         $documents = $project->documents()->whereHas('type', function($q) {
                             $q->where('name', 'Protocolo');
@@ -124,14 +139,12 @@
                                         </div>
 
                                         @php
-                                            // Buscamos las evaluaciones vinculadas a ESTE documento específico
                                             $evals = ProjectEvaluation::where('project_document_id', $doc->id)->with('teacher')->get();
                                         @endphp
                                         
                                         @if($evals->count() > 0)
                                             <div class="mt-3 space-y-2">
                                                 @foreach($evals as $eval)
-                                                    {{-- Validamos los 3 estados posibles --}}
                                                     @if($eval->status_id === UserStatus::ACTIVE->value)
                                                         @php $bgClass = 'bg-green-50 text-green-800'; $statusText = __('Approved'); @endphp
                                                     @elseif($eval->status_id === UserStatus::PENDING->value)
@@ -144,7 +157,6 @@
                                                         <strong>{{ $eval->teacher->name }}:</strong> 
                                                         {{ $statusText }}
                                                         
-                                                        {{-- Solo mostramos las observaciones si ya lo evaluó --}}
                                                         @if($eval->observations && $eval->status_id !== UserStatus::PENDING->value)
                                                             <br><em>"{{ $eval->observations }}"</em>
                                                         @endif
@@ -168,12 +180,10 @@
                         $totalOccupied = count($teamMembers) + $pendingCount;
                         $hasSpace = $totalOccupied < $project->section->max_team_size;
 
-                        // Lógica para saber si puede subir el protocolo
                         $isDeadlineOpen = AcademicActivity::isOpen('protocol_submission');
                         $lateRequest = $project->lateSubmissionRequests()->latest()->first();
                         $hasApprovedLateRequest = $lateRequest && $lateRequest->status_id === UserStatus::ACTIVE->value;
                         
-                        // Puede subir si está en fecha, o si tiene un permiso aprobado
                         $canSubmitProtocol = $isDeadlineOpen || $hasApprovedLateRequest;
                     @endphp
 
@@ -181,7 +191,7 @@
                     @if($project->status_id === UserStatus::DRAFT->value || $project->status_id === UserStatus::NEEDS_CORRECTIONS->value)
                         
                         @if($canSubmitProtocol)
-                            <!-- ALERTA DE OBSERVACIONES (Solo si fue rechazado) -->
+                            <!-- ALERTA DE OBSERVACIONES -->
                             @if($project->status_id === UserStatus::NEEDS_CORRECTIONS->value)
                                 @php
                                     $rejections = $project->evaluations()->where('status_id', UserStatus::REJECTED->value)->whereNotNull('observations')->with('teacher')->get();
@@ -227,7 +237,7 @@
                                 </form>
                             </div>
                         @else
-                            <!-- BLOQUE DE SOLICITUD EXTEMPORÁNEA (Si la fecha está cerrada y no tiene permiso) -->
+                            <!-- BLOQUE DE SOLICITUD EXTEMPORÁNEA -->
                             @if($lateRequest && $lateRequest->status_id === UserStatus::PENDING->value)
                                 <div class="bg-yellow-50 p-4 rounded text-sm text-yellow-800 border border-yellow-200">
                                     {{ __('Your late submission request is under review by the coordination.') }}
@@ -385,7 +395,7 @@
                             <h3 class="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{{ __('Academic Tutor') }}</h3>
                             <p class="text-sm text-gray-500">{{ __('Trayecto 1 students do not require an academic tutor. Your subject teacher will guide you.') }}</p>
                         </div>
-                    @elseif($project->status_id === \App\Enums\UserStatus::ACTIVE->value)
+                    @elseif($project->status_id === UserStatus::ACTIVE->value)
                         <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6">
                             <h3 class="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{{ __('Academic Tutor') }}</h3>
                             <p class="text-xs text-gray-600 mb-4">{{ __('Manage your tutor request and view your tutoring logbook.') }}</p>

@@ -9,6 +9,7 @@ enum UserStatus: int
     case REJECTED = 3;
     case DRAFT    = 4;
     case NEEDS_CORRECTIONS = 5;
+    case READY_FOR_EXPERTS = 6;
 
     public function label(): string
     {
@@ -18,6 +19,7 @@ enum UserStatus: int
             self::REJECTED => 'Rechazado',
             self::DRAFT    => 'Borrador',
             self::NEEDS_CORRECTIONS => 'Necesita correcciones',
+            self::READY_FOR_EXPERTS => 'Listo para evaluación de expertos',
         };
     }
 }

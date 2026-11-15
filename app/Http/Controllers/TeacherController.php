@@ -33,6 +33,7 @@ class TeacherController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($teacher->id)],
             'credential' => ['required', 'numeric', 'digits_between:6,9', Rule::unique('users')->ignore($teacher->id)],
             'phone' => ['required', 'numeric', 'digits_between:10,11'],
+            'max_tutored_projects' => ['required', 'integer', 'min:1'],
             'password' => ['nullable', 'string', 'min:8'],
         ]);
 
@@ -40,6 +41,7 @@ class TeacherController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'credential' => $request->credential,
+            'max_tutored_projects' => $request->max_tutored_projects,
             'phone' => $request->phone,
         ]);
 
@@ -69,6 +71,7 @@ class TeacherController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'credential' => ['required', 'numeric', 'digits_between:6,9', 'unique:users,credential'],
             'phone' => ['required', 'numeric', 'digits_between:10,11'],
+            'max_tutored_projects' => ['required', 'integer', 'min:1'],
             'password' => ['required', 'string', 'min:8'],
         ]);
 
@@ -78,6 +81,7 @@ class TeacherController extends Controller
             'credential' => $request->credential,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
+            'max_tutored_projects' => $request->max_tutored_projects,
             'status_id' => UserStatus::ACTIVE->value,
         ]);
 

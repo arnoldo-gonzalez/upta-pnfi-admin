@@ -15,4 +15,12 @@ class ThematicAxis extends Model
     public function investigationLines() { 
         return $this->hasMany(InvestigationLine::class); 
     }
+
+    /**
+     * Relación: Un Eje Temático tiene muchos criterios de evaluación.
+     */
+    public function evaluationCriteria()
+    {
+        return $this->hasMany(EvaluationCriteria::class);
+    }
 }
