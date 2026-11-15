@@ -1,6 +1,7 @@
 @use('App\Enums\UserStatus')
 @use('App\Enums\TutorRequestStatus')
 @use('App\Models\ProjectEvaluation')
+@use('App\Models\AcademicActivity')
 
 <x-app-layout>
     <div class="max-w-5xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -166,55 +167,89 @@
                         $pendingCount = $sentInvitations->where('status_id', UserStatus::PENDING->value)->count();
                         $totalOccupied = count($teamMembers) + $pendingCount;
                         $hasSpace = $totalOccupied < $project->section->max_team_size;
+
+                        // Lógica para saber si puede subir el protocolo
+                        $isDeadlineOpen = AcademicActivity::isOpen('protocol_submission');
+                        $lateRequest = $project->lateSubmissionRequests()->latest()->first();
+                        $hasApprovedLateRequest = $lateRequest && $lateRequest->status_id === UserStatus::ACTIVE->value;
+                        
+                        // Puede subir si está en fecha, o si tiene un permiso aprobado
+                        $canSubmitProtocol = $isDeadlineOpen || $hasApprovedLateRequest;
                     @endphp
 
-                    <!-- 1. FORMULARIO DE SUBIDA (Borrador o Rechazado) -->
-                    @if($project->section->is_active && ($project->status_id === UserStatus::DRAFT->value || $project->status_id === UserStatus::NEEDS_CORRECTIONS->value) )
+                    <!-- 1. FORMULARIO DE SUBIDA Y ALERTAS -->
+                    @if($project->status_id === UserStatus::DRAFT->value || $project->status_id === UserStatus::NEEDS_CORRECTIONS->value)
                         
-                        <!-- ALERTA DE OBSERVACIONES (Solo si fue rechazado) -->
-                        @if($project->status_id === UserStatus::NEEDS_CORRECTIONS->value)
-                            @php
-                                // Buscamos las observaciones de los docentes que lo rechazaron
-                                $rejections = $project->evaluations()
-                                    ->where('status_id', UserStatus::REJECTED->value)
-                                    ->whereNotNull('observations')
-                                    ->with('teacher')
-                                    ->get();
-                            @endphp
-                            
-                            <div class="bg-red-50 border border-red-200 shadow-md rounded-lg p-6 mb-6">
-                                <h3 class="text-sm font-bold text-red-800 mb-3 uppercase tracking-wider flex items-center">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                    {{ __('Corrections Required') }}
-                                </h3>
-                                <ul class="space-y-3">
-                                    @foreach($rejections as $rejection)
-                                        <li class="bg-white p-3 rounded border border-red-100 text-sm">
-                                            <p class="text-gray-800 italic">"{{ $rejection->observations }}"</p>
-                                            <p class="text-xs text-gray-500 mt-2 font-bold">- {{ $rejection->teacher->name }}</p>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-
-                        <!-- FORMULARIO DE SUBIDA -->
-                        <div class="bg-upta-50 border border-upta-200 shadow-md rounded-lg p-6">
-                            <h3 class="text-sm font-bold text-upta-900 mb-3 uppercase tracking-wider">
-                                {{ $project->status_id === UserStatus::NEEDS_CORRECTIONS->value ? __('Resubmit Protocol') : __('Submit Protocol') }}
-                            </h3>
-                            
-                            <form action="{{ route('projects.submitProtocol', $project) }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <div class="mb-3">
-                                    <input type="file" name="protocol_file" accept=".pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-upta-600 file:text-white hover:file:bg-upta-700" required>
-                                    @error('protocol_file') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        @if($canSubmitProtocol)
+                            <!-- ALERTA DE OBSERVACIONES (Solo si fue rechazado) -->
+                            @if($project->status_id === UserStatus::NEEDS_CORRECTIONS->value)
+                                @php
+                                    $rejections = $project->evaluations()->where('status_id', UserStatus::REJECTED->value)->whereNotNull('observations')->with('teacher')->get();
+                                @endphp
+                                <div class="bg-red-50 border border-red-200 shadow-md rounded-lg p-6 mb-6">
+                                    <h3 class="text-sm font-bold text-red-800 mb-3 uppercase tracking-wider flex items-center">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                        {{ __('Corrections Required') }}
+                                    </h3>
+                                    <ul class="space-y-3">
+                                        @foreach($rejections as $rejection)
+                                            <li class="bg-white p-3 rounded border border-red-100 text-sm">
+                                                <p class="text-gray-800 italic">"{{ $rejection->observations }}"</p>
+                                                <p class="text-xs text-gray-500 mt-2 font-bold">- {{ $rejection->teacher->name }}</p>
+                                            </li>
+                                        @endforeach
+                                    </ul>
                                 </div>
-                                <button type="submit" class="w-full bg-upta-600 text-white text-sm font-semibold px-4 py-2 rounded hover:bg-upta-700 transition shadow-sm">
-                                    {{ __('Submit') }}
-                                </button>
-                            </form>
-                        </div>
+                            @endif
+
+                            <!-- AVISO SI TIENE PERMISO EXTEMPORÁNEO -->
+                            @if(!$isDeadlineOpen && $hasApprovedLateRequest)
+                                <div class="bg-green-50 p-4 rounded text-sm text-green-800 border border-green-200 mb-4">
+                                    {{ __('Your late submission request was approved. You can upload your protocol now.') }}
+                                </div>
+                            @endif
+
+                            <!-- FORMULARIO DE SUBIDA -->
+                            <div class="bg-upta-50 border border-upta-200 shadow-md rounded-lg p-6">
+                                <h3 class="text-sm font-bold text-upta-900 mb-3 uppercase tracking-wider">
+                                    {{ $project->status_id === UserStatus::NEEDS_CORRECTIONS->value ? __('Resubmit Protocol') : __('Submit Protocol') }}
+                                </h3>
+                                
+                                <form action="{{ route('projects.submitProtocol', $project) }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    <div class="mb-3">
+                                        <input type="file" name="protocol_file" accept=".pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-upta-600 file:text-white hover:file:bg-upta-700" required>
+                                        @error('protocol_file') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                                    </div>
+                                    <button type="submit" class="w-full bg-upta-600 text-white text-sm font-semibold px-4 py-2 rounded hover:bg-upta-700 transition shadow-sm">
+                                        {{ __('Submit') }}
+                                    </button>
+                                </form>
+                            </div>
+                        @else
+                            <!-- BLOQUE DE SOLICITUD EXTEMPORÁNEA (Si la fecha está cerrada y no tiene permiso) -->
+                            @if($lateRequest && $lateRequest->status_id === UserStatus::PENDING->value)
+                                <div class="bg-yellow-50 p-4 rounded text-sm text-yellow-800 border border-yellow-200">
+                                    {{ __('Your late submission request is under review by the coordination.') }}
+                                </div>
+                            @elseif($lateRequest && $lateRequest->status_id === UserStatus::REJECTED->value)
+                                <div class="bg-red-50 p-4 rounded text-sm text-red-800 border border-red-200">
+                                    <p class="font-bold mb-1">{{ __('Your late submission request was rejected.') }}</p>
+                                    <p class="text-xs italic">"{{ $lateRequest->reason }}"</p>
+                                </div>
+                            @else
+                                <div class="bg-gray-50 p-4 rounded border border-gray-200">
+                                    <h4 class="font-bold text-gray-800 text-sm mb-2">{{ __('The deadline has passed') }}</h4>
+                                    <p class="text-xs text-gray-600 mb-3">{{ __('If you need to modify your protocol, you must provide a valid justification for the coordination to review.') }}</p>
+                                    <form action="{{ route('late-submission.store', $project) }}" method="POST">
+                                        @csrf
+                                        <textarea name="reason" rows="3" class="w-full text-sm rounded border-gray-300 mb-2" placeholder="{{ __('Explain the reasons for the late submission...') }}" required></textarea>
+                                        @error('reason') <p class="text-xs text-red-600 mb-2 font-bold">{{ $message }}</p> @enderror
+                                        <button type="submit" class="bg-upta-600 text-white px-4 py-2 rounded text-xs font-bold">{{ __('Request Authorization') }}</button>
+                                    </form>
+                                </div>
+                            @endif
+                        @endif
                     @endif
 
                     <!-- 2. VER DOCUMENTO (Si ya fue enviado) -->

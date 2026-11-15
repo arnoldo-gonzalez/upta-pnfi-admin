@@ -52,6 +52,14 @@
                     <a href="{{ route('coordinator.protocols') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('coordinator.protocols') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
                         {{ __('Protocols') }}
                     </a>
+
+                    <a href="{{ route('calendar.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('calendar.*') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
+                        {{ __('Academic Calendar') }}
+                    </a>
+
+                    <a href="{{ route('late-requests.index') }}" class="block px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('late-requests.*') ? 'bg-upta-600 text-white shadow-sm' : 'text-upta-200 hover:bg-upta-800 hover:text-white' }}">
+                        {{ __('Late Requests') }}
+                    </a>
                     
                     <a href="#" class="block px-3 py-2 text-sm font-medium text-upta-200 rounded-md hover:bg-upta-800 hover:text-white opacity-50 cursor-not-allowed">
                         {{ __('Registrations') }}

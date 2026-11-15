@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\AcademicCalendarController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\LateSubmissionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ProfileController;
@@ -40,6 +42,7 @@ Route::middleware(['auth'/* , 'verified' */])->group(function () {
 
 Route::middleware(['auth', 'role:admin|estudiante'])->group(function () {
 
+    Route::post('/projects/{project}/late-submission', [LateSubmissionController::class, 'store'])->name('late-submission.store');
     Route::post('/projects/{project}/request-tutor', [TutorController::class, 'request'])->name('tutors.request');
     Route::get('/tutor-logs/{log}/download', [TutorLogController::class, 'downloadLog'])->name('tutor-logs.download');
 
@@ -57,6 +60,9 @@ Route::middleware(['auth', 'role:admin|estudiante'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:admin|coordinador'])->group(function () {
+
+    Route::get('/coordinator/late-requests', [LateSubmissionController::class, 'index'])->name('late-requests.index');
+    Route::post('/coordinator/late-requests/{lateRequest}/review', [LateSubmissionController::class, 'review'])->name('late-requests.review');
 
     Route::get('/evaluations', [EvaluationController::class, 'index'])->name('evaluations.coordinator.index');
     Route::post('/evaluations/{project}/assign', [EvaluationController::class, 'assign'])->name('evaluations.coordinator.assign.store');
@@ -88,6 +94,12 @@ Route::middleware(['auth', 'role:admin|coordinador'])->group(function () {
     Route::post('/coordinator/calculate-quota', [TutorController::class, 'calculateFairQuota'])->name('coordinator.calculateQuota');
 
     Route::resource('events', EventController::class)->except(['show', 'edit', 'update']);
+
+    Route::get('/academic-calendar', [AcademicCalendarController::class, 'index'])->name('calendar.index');
+    Route::post('/academic-calendar/terms', [AcademicCalendarController::class, 'storeTerm'])->name('calendar.storeTerm');
+    Route::delete('/academic-calendar/terms/{term}', [AcademicCalendarController::class, 'destroyTerm'])->name('calendar.destroyTerm');
+    Route::post('/academic-calendar/terms/{term}/activities', [AcademicCalendarController::class, 'storeActivity'])->name('calendar.storeActivity');
+    Route::delete('/academic-calendar/activities/{activity}', [AcademicCalendarController::class, 'destroyActivity'])->name('calendar.destroyActivity');
 
 });
 

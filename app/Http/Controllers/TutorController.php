@@ -6,6 +6,7 @@ use App\Enums\TutorRequestStatus;
 use App\Models\Project;
 use App\Models\User;
 use App\Enums\UserStatus;
+use App\Models\AcademicActivity;
 use App\Models\ProjectStudent;
 use Illuminate\Http\Request;
 use App\Notifications\TutorRequested;
@@ -104,6 +105,10 @@ class TutorController extends Controller
     {
         if ($project->section->trayecto->number == 1) {
             return back()->with('error', __('Trayecto 1 students do not require an academic tutor.'));
+        }
+
+        if (!AcademicActivity::isOpen('tutor_request')) {
+            return back()->with('error', __('The tutor request period has closed.'));
         }
 
         $request->validate(['tutor_id' => ['required', 'exists:users,id']]);

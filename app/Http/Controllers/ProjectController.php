@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\TutorRequestStatus;
 use App\Enums\UserStatus;
+use App\Models\AcademicActivity;
 use App\Models\DocumentType;
 use App\Models\Project;
 use App\Models\ProjectStudent;
@@ -170,6 +171,17 @@ class ProjectController extends Controller
             'protocol_file' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
+        if (!AcademicActivity::isOpen('protocol_submission')) {
+            // Si está fuera de fecha, verificamos si hay una solicitud aprobada
+            $hasApprovedRequest = $project->lateSubmissionRequests()
+                ->where('status', 'approved')
+            ->exists();
+
+            if (!$hasApprovedRequest) {
+                return back()->with('error', __('The deadline has passed. You must request a late submission authorization.'));
+            }
+        }
+        
         if (!in_array($project->status_id, [UserStatus::DRAFT->value, UserStatus::NEEDS_CORRECTIONS->value])) {
             return back()->with('error', __('This project cannot be submitted at this time.'));
         }

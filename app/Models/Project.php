@@ -20,6 +20,11 @@ class Project extends Model
         return $this->belongsTo(Status::class); 
     }
 
+    public function lateSubmissionRequests()
+    {
+        return $this->hasMany(LateSubmissionRequest::class);
+    }
+
     public function section(): BelongsTo { 
         return $this->belongsTo(Section::class); 
     }
