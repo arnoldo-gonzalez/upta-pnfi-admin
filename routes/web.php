@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AcademicCalendarController;
+use App\Http\Controllers\AdminProtocolTemplateController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EvaluationController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectDocumentController;
 use App\Http\Controllers\ProjectInvitationController;
+use App\Http\Controllers\ProtocolPreviewController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\TeacherController;
@@ -103,6 +105,24 @@ Route::middleware(['auth', 'role:admin|coordinador'])->group(function () {
     Route::delete('/academic-calendar/terms/{term}', [AcademicCalendarController::class, 'destroyTerm'])->name('calendar.destroyTerm');
     Route::post('/academic-calendar/terms/{term}/activities', [AcademicCalendarController::class, 'storeActivity'])->name('calendar.storeActivity');
     Route::delete('/academic-calendar/activities/{activity}', [AcademicCalendarController::class, 'destroyActivity'])->name('calendar.destroyActivity');
+
+    // Rutas MVP: gestión de plantillas de protocolo
+    Route::get('/admin/protocolo/plantilla', [AdminProtocolTemplateController::class, 'show'])
+        ->name('admin.protocolo.plantilla');
+    Route::post('/admin/protocolo/plantilla', [AdminProtocolTemplateController::class, 'store'])
+        ->name('admin.protocolo.plantilla.store');
+    Route::patch('/admin/protocolo/plantilla/schema', [AdminProtocolTemplateController::class, 'updateSchema'])
+        ->name('admin.protocolo.plantilla.schema');
+
+});
+
+// Rutas para estudiante
+Route::middleware(['auth', 'role:estudiante'])->group(function () {
+
+    Route::get('/protocolo/llenar', [ProtocolPreviewController::class, 'create'])
+        ->name('protocolo.llenar');
+    Route::post('/protocolo/llenar/preview', [ProtocolPreviewController::class, 'preview'])
+        ->name('protocolo.llenar.preview');
 
 });
 
