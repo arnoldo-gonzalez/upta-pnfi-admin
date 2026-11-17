@@ -9,10 +9,17 @@
         <div class="flex justify-between items-center mb-6 no-print">
             <x-heading level="h1" class="mb-0">{{ __('Protocols Report') }}</x-heading>
             
-            <button onclick="printReport('{{ route('reports.print', 'protocols') }}')" class="bg-gray-800 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-900 transition shadow-sm flex items-center">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                {{ __('Export to PDF') }}
-            </button>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('coordinator.protocols.edit') }}"
+                   class="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-600 transition shadow-sm flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    {{ __('Editar protocolo') }}
+                </a>
+                <button onclick="printReport('{{ route('reports.print', 'protocols') }}')" class="bg-gray-800 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-900 transition shadow-sm flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    {{ __('Export to PDF') }}
+                </button>
+            </div>
         </div>
 
         <div class="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden">
@@ -41,17 +48,17 @@
                                         <li>{{ $student->enrollment->student->name }}</li>
                                     @endforeach
                                 </ul>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                @if($project->status_id === UserStatus::PENDING->value)
-                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">{{ __('In Review') }}</span>
-                                @elseif($project->status_id === UserStatus::NEEDS_CORRECTIONS->value)
-                                    <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">{{ __('Needs Corrections') }}</span>
-                                @elseif($project->status_id === UserStatus::ACTIVE->value)
-                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">{{ __('Approved') }}</span>
-                                @endif
-                            </td>
-                        </tr>
+</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            @if($project->status_id === UserStatus::PENDING->value)
+                                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">{{ __('In Review') }}</span>
+                            @elseif($project->status_id === UserStatus::NEEDS_CORRECTIONS->value)
+                                <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">{{ __('Needs Corrections') }}</span>
+                            @elseif($project->status_id === UserStatus::ACTIVE->value)
+                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">{{ __('Approved') }}</span>
+                            @endif
+                        </td>
+                    </tr>
                     @empty
                         <tr><td colspan="4" class="px-6 py-10 text-center text-gray-500">{{ __('No protocols found.') }}</td></tr>
                     @endforelse

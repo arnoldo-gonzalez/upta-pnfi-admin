@@ -1,0 +1,1 @@
+<img src="<?php echo e(asset("images/logo_upta.png")); ?>" alt="Logo de la UPTA" <?php echo e($attributes); ?> /><?php /**PATH C:\Users\Sebas\Documents\University things\Proyecto 2do año\Proyecto_Código\resources\views/components/application-logo.blade.php ENDPATH**/ ?>

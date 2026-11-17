@@ -112,7 +112,25 @@ class EvaluationController extends Controller
 
         $protocolDoc = $evaluation->document; 
 
-        return view('evaluations.teacher.review', compact('evaluation', 'project', 'protocolDoc'));
+        // Respuestas del estudiante (protocolo) y correcciones ya guardadas
+        $answers = $protocolDoc
+            ? $protocolDoc->answers()->pluck('value', 'placeholder_key')->all()
+            : [];
+
+        $fieldCorrections = $evaluation->fieldCorrections()->pluck('correction', 'placeholder_key')->all();
+
+        // Etiquetas del schema de la plantilla usada
+        $template = $protocolDoc?->protocolTemplate;
+        $labels = [];
+        if ($template) {
+            foreach ($template->schema_json ?? [] as $campo) {
+                $labels[$campo['key']] = $campo['label'] ?? $campo['key'];
+            }
+        }
+
+        return view('evaluations.teacher.review', compact(
+            'evaluation', 'project', 'protocolDoc', 'answers', 'fieldCorrections', 'labels'
+        ));
     }
 
     public function storeReview(Request $request, ProjectEvaluation $evaluation)
@@ -124,6 +142,8 @@ class EvaluationController extends Controller
         $request->validate([
             'decision' => ['required', 'in:approved,rejected'],
             'observations' => ['required_if:decision,rejected', 'nullable', 'string'],
+            'field_corrections' => ['nullable', 'array'],
+            'field_corrections.*' => ['nullable', 'string'],
         ]);
 
         DB::transaction(function () use ($request, $evaluation) {
@@ -134,6 +154,23 @@ class EvaluationController extends Controller
                 'observations' => $request->observations,
                 'evaluated_at' => now(),
             ]);
+
+            // 1.1. Guardamos las correcciones por campo si se enviaron
+            if ($request->has('field_corrections')) {
+                foreach ($request->field_corrections as $key => $correction) {
+                    if (is_null($correction) || trim($correction) === '') {
+                        continue;
+                    }
+
+                    $evaluation->fieldCorrections()->updateOrCreate(
+                        ['placeholder_key' => $key],
+                        [
+                            'correction' => $correction,
+                            'evaluator_id' => auth()->id(),
+                        ]
+                    );
+                }
+            }
 
             $project = $evaluation->project;
 
@@ -162,6 +199,30 @@ class EvaluationController extends Controller
         });
 
         return redirect()->route('evaluations.teacher.index')->with('success', __('Evaluation submitted successfully.'));
+    }
+
+    public function storeFieldCorrection(Request $request, ProjectEvaluation $evaluation)
+    {
+        if ($evaluation->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'placeholder_key' => ['required', 'string'],
+            'correction' => ['required', 'string'],
+        ]);
+
+        $evaluation->fieldCorrections()->updateOrCreate(
+            ['placeholder_key' => $request->placeholder_key],
+            [
+                'correction' => $request->correction,
+                'evaluator_id' => auth()->id(),
+            ]
+        );
+
+        return redirect()
+            ->route('evaluations.teacher.review', $evaluation)
+            ->with('success', __('Field correction submitted successfully.'));
     }
 
         /**
