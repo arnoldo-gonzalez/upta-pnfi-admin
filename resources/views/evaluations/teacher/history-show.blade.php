@@ -55,6 +55,18 @@
                                                 "{{ $eval->observations }}"
                                             </div>
                                         @endif
+
+                                        @php $evalCorrections = $eval->fieldCorrections; @endphp
+                                        @if($evalCorrections->count() > 0)
+                                            <div class="mt-2">
+                                                <div class="text-[10px] uppercase font-bold text-gray-500 mb-1">{{ __('Field Corrections') }}</div>
+                                                <ul class="text-sm text-gray-700 space-y-1 list-disc pl-4">
+                                                    @foreach($evalCorrections as $fc)
+                                                        <li>{{ $fc->placeholder_key }}: "{{ e($fc->correction) }}"</li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        @endif
                                     </div>
                                 @endforeach
                             </div>

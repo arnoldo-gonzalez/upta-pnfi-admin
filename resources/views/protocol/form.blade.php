@@ -19,7 +19,15 @@
             <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200">
                 <p class="text-sm text-gray-600 mb-6">{{ __('Complete los campos del protocolo y previsualice el resultado.') }}</p>
 
-                <form action="{{ route('protocolo.llenar.preview') }}" method="POST" class="space-y-5">
+                @if (!empty($project))
+                    <input type="hidden" name="project_id" value="{{ $project->id }}">
+                @endif
+
+                @php
+    $formAction = !empty($project) ? route('projects.protocol.preview', $project) : route('protocolo.llenar.preview');
+@endphp
+
+<form action="{{ $formAction }}" method="POST" class="space-y-5">
                     @csrf
 
                     @php $placeholders = $template->schema_json ?? []; @endphp
@@ -33,6 +41,7 @@
                             $maxChars = $campo['maxChars'] ?? null;
                             $options = $campo['options'] ?? [];
                             $oldValue = old($key);
+                            $value = !empty($values[$key]) ? $values[$key] : ($oldValue ?? '');
                         @endphp
 
                         <div>
@@ -45,42 +54,42 @@
                                           @if ($required) required @endif
                                           @if ($maxChars) maxlength="{{ $maxChars }}" @endif
                                           rows="3"
-                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500">{{ $oldValue }}</textarea>
+                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500">{{ $value }}</textarea>
                             @elseif ($type === 'select')
                                 <select name="{{ $key }}" id="{{ $key }}"
                                         @if ($required) required @endif
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500">
                                     <option value="">{{ __('-- Seleccionar --') }}</option>
                                     @foreach ($options as $opt)
-                                        <option value="{{ $opt }}" {{ $oldValue == $opt ? 'selected' : '' }}>{{ $opt }}</option>
+                                        <option value="{{ $opt }}" {{ $value == $opt ? 'selected' : '' }}>{{ $opt }}</option>
                                     @endforeach
                                 </select>
                             @elseif ($type === 'date')
                                 <input type="date" name="{{ $key }}" id="{{ $key }}"
-                                       value="{{ $oldValue }}"
+                                       value="{{ $value }}"
                                        @if ($required) required @endif
                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500">
                             @elseif ($type === 'number')
                                 <input type="number" name="{{ $key }}" id="{{ $key }}"
-                                       value="{{ $oldValue }}"
+                                       value="{{ $value }}"
                                        @if ($required) required @endif
                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500">
                             @elseif ($type === 'email')
                                 <input type="email" name="{{ $key }}" id="{{ $key }}"
-                                       value="{{ $oldValue }}"
+                                       value="{{ $value }}"
                                        @if ($required) required @endif
                                        @if ($maxChars) maxlength="{{ $maxChars }}" @endif
                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500">
                             @elseif ($type === 'tel')
                                 <input type="tel" name="{{ $key }}" id="{{ $key }}"
-                                       value="{{ $oldValue }}"
+                                       value="{{ $value }}"
                                        @if ($required) required @endif
                                        @if ($maxChars) maxlength="{{ $maxChars }}" @endif
                                        placeholder="+58 412 123 4567"
                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500">
                             @else
                                 <input type="text" name="{{ $key }}" id="{{ $key }}"
-                                       value="{{ $oldValue }}"
+                                       value="{{ $value }}"
                                        @if ($required) required @endif
                                        @if ($maxChars) maxlength="{{ $maxChars }}" @endif
                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500">
@@ -92,10 +101,19 @@
                         </div>
                     @endforeach
 
-                    <div class="flex justify-end pt-4">
-                        <button type="submit" class="bg-upta-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-upta-700 transition shadow-sm">
+                    <div class="flex justify-end gap-3 pt-4">
+                        <button type="submit" class="bg-white text-upta-700 px-6 py-2 rounded-md font-semibold hover:bg-upta-100 transition shadow-sm border border-upta-300">
                             {{ __('Previsualizar protocolo') }}
                         </button>
+
+                        @if (!empty($project))
+                            <button type="submit"
+                                    formaction="{{ route('projects.protocol.submit', $project) }}"
+                                    class="bg-green-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-green-700 transition shadow-sm"
+                                    onclick="return confirm('{{ __('¿Guardar y enviar el protocolo a revisión? Una vez enviado no podrá editarlo hasta que sea evaluado.') }}')">
+                                {{ __('Guardar y enviar a revisión') }}
+                            </button>
+                        @endif
                     </div>
                 </form>
             </div>
