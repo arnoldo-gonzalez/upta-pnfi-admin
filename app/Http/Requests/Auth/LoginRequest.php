@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use App\Enums\UserStatus;
+use App\Models\AuditLog;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -58,6 +59,8 @@ class LoginRequest extends FormRequest
                 'email' => 'Tu cuenta se encuentra en estado pendiente o inactiva. Debes esperar la aprobación de tu asesor.',
             ]);
         }
+
+        AuditLog::record('login', 'El usuario ' . Auth::user()->name . ' inició sesión en el sistema.');
 
         RateLimiter::clear($this->throttleKey());
     }

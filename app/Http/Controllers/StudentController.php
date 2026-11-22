@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Enums\UserStatus;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -46,8 +47,10 @@ class StudentController extends Controller
     public function approve(User $student)
     {
         $this->authorizeStudent($student);
-        
+
+        AuditLog::record('approve_student', 'Aprobó la cuenta del estudiante: ' . $student->name);
         $student->update(['status_id' => UserStatus::ACTIVE->value]);
+        
         return back()->with('success', __('The student :name has been successfully approved.', ['name' => $student->name]));
     }
 

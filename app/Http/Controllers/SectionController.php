@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\Section;
 use App\Models\Trayecto;
 use App\Models\User;
@@ -109,6 +110,8 @@ class SectionController extends Controller
             'period' => $request->period,
             'is_active' => true,      
         ]);
+
+        AuditLog::record('create_section', 'Creó la sección ' . $section->name . ' para el periodo ' . $section->period);
 
         if ($request->filled('teacher_id')) {
             $section->teachers()->attach($request->teacher_id, ['is_active' => true]);

@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\User;
 use App\Enums\UserStatus;
 use App\Models\AcademicActivity;
+use App\Models\AuditLog;
 use App\Models\ProjectStudent;
 use Illuminate\Http\Request;
 use App\Notifications\TutorRequested;
@@ -252,6 +253,8 @@ class TutorController extends Controller
             'tutor_id' => $teacher->id,
             'tutor_request_status_id' => TutorRequestStatus::ACCEPTED->value
         ]);
+
+        AuditLog::record('assign_tutor', 'Asignó al docente ' . $teacher->name . ' como tutor del proyecto: ' . $project->title);
 
         // Notificar al docente
         $teacher->notify(new TutorRequested($project));

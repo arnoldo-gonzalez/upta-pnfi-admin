@@ -7,6 +7,7 @@ use App\Models\ProjectEvaluation;
 use App\Models\EvaluationStage;
 use App\Models\User;
 use App\Enums\UserStatus;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\EvaluatorAssigned;
@@ -150,8 +151,10 @@ class EvaluationController extends Controller
             // 3. Actualizamos el estado del proyecto
             if ($hasRejected) {
                 $project->update(['status_id' => UserStatus::NEEDS_CORRECTIONS->value]);
+                AuditLog::record('reject_protocol', 'Rechazó el protocolo del proyecto: ' . $project->title);
             } elseif ($allApproved) {
                 $project->update(['status_id' => UserStatus::ACTIVE->value]); 
+                AuditLog::record('approve_protocol', 'Aprobó el protocolo del proyecto: ' . $project->title);
             }
 
             // 4. Notificamos a los estudiantes

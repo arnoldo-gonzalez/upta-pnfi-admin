@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectDocumentController;
 use App\Http\Controllers\ProjectInvitationController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\TeacherController;
@@ -64,6 +65,10 @@ Route::middleware(['auth', 'role:admin|coordinador|docente'])->group(function ()
     Route::get('/evaluations', [EvaluationController::class, 'index'])->name('evaluations.coordinator.index');
     Route::post('/evaluations/{project}/assign', [EvaluationController::class, 'assign'])->name('evaluations.coordinator.assign.store');
     Route::get('/evaluations/{project}/assign', [EvaluationController::class, 'assignForm'])->name('evaluations.coordinator.assign');
+});
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index');
 });
 
 Route::middleware(['auth', 'role:admin|coordinador'])->group(function () {

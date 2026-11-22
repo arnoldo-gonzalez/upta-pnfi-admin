@@ -538,5 +538,11 @@
 
     "The tutor request period has closed.": "El plazo para solicitar un tutor ya ha finalizado.",
     
-    "No tienes permiso para asignar evaluadores a este proyecto.": "No tienes permiso para asignar evaluadores a este proyecto."
+    "No tienes permiso para asignar evaluadores a este proyecto.": "No tienes permiso para asignar evaluadores a este proyecto.",
+
+    "Audit Logs": "Registros de Auditoría",
+    "Action": "Acción",
+    "IP Address": "Dirección IP",
+    "System": "Sistema",
+    "No audit logs recorded yet.": "Aún no hay registros de auditoría."
 }
