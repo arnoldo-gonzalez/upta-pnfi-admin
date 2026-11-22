@@ -19,8 +19,8 @@
                         {{ __('Protocol Document') }} - {{ __('Submission') }} #{{ $protocolDoc->submission_number ?? 1 }}
                     </p>
                     @if($protocolDoc)
-                        <a href="{{ route('documents.download', $protocolDoc) }}" target="_blank" class="text-xs text-upta-600 hover:underline">
-                            {{ __('Download PDF') }}
+                        <a href="{{ route('projects.protocol.download', $protocolDoc->project) }}" target="_blank" class="text-xs text-upta-600 hover:underline">
+                            {{ __('Download Protocol Docx') }}
                         </a>
                     @else
                         <span class="text-xs text-red-500">{{ __('Document not found.') }}</span>
@@ -73,6 +73,28 @@
                     <textarea name="observations" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" placeholder="{{ __('Required if rejected...') }}">{{ old('observations') }}</textarea>
                     @error('observations') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
+
+                <!-- CORRECCIONES POR CAMPO -->
+                @if(count($answers ?? []))
+                    <div class="mb-6 border-t border-gray-200 pt-6">
+                        <h4 class="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wider">{{ __('Field Corrections') }}</h4>
+                        <p class="text-xs text-gray-500 mb-3">{{ __('Enter a correction for each field you want the student to fix. Leave blank for no correction.') }}</p>
+                        <div class="space-y-3">
+                            @foreach($answers as $key => $value)
+                                <div class="flex flex-col sm:flex-row gap-3 p-3 bg-gray-50 rounded border border-gray-100">
+                                    <div class="sm:w-1/3">
+                                        <label class="block text-xs font-medium text-gray-500 mb-1">{{ $labels[$key] ?? $key }}</label>
+                                        <input type="text" name="field_corrections[{{ $key }}]"
+                                               value="{{ old('field_corrections.' . $key) ?? ($fieldCorrections[$key] ?? '') }}"
+                                               placeholder="{{ __('Enter correction...') }}"
+                                               class="w-full text-sm rounded border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500">
+                                        <p class="text-xs text-gray-400 mt-1">{{ __('Student: ') }} "{{ e($value) }}"</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
 
                 <div class="flex justify-end">
                     <button type="submit" class="bg-upta-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-upta-700 transition shadow-sm">

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['project_id', 'user_id', 'stage_id', 'status_id', 'observations', 'evaluated_at', 'project_document_id'])]
 class ProjectEvaluation extends Model
@@ -34,5 +35,25 @@ class ProjectEvaluation extends Model
     {
         return $this->belongsTo(ProjectDocument::class, 'project_document_id');
     }
-    
+
+    /**
+     * Correcciones por campo de esta evaluación específica (histórico).
+     * Ahora están ancladas directamente a ProjectEvaluation.
+     */
+    public function fieldCorrections(): HasMany
+    {
+        return $this->hasMany(ProjectProtocolFieldCorrection::class, 'project_evaluation_id');
+    }
+
+    /**
+     * Correcciones por campo asociadas a esta evaluación específica.
+     */
+    public function getFieldCorrections()
+    {
+        if (! $this->exists) {
+            return collect();
+        }
+
+        return $this->fieldCorrections()->pluck('correction', 'placeholder_key')->all();
+    }
 }

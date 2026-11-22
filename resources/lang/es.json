@@ -203,6 +203,12 @@
     "Observations": "Observaciones",
     "Required if rejected...": "Requerido si se rechaza...",
     "Submit Evaluation": "Enviar Evaluación",
+    "Download Protocol Docx": "Descargar Documento del Protocolo",
+    "Field Corrections": "Correcciones por Campo",
+    "Enter a correction for each field you want the student to fix. Leave blank for no correction.": "Ingresa una corrección para cada campo que quieras que el estudiante arregle. Deja en blanco si no hay corrección.",
+    "Enter correction...": "Ingresa la corrección...",
+    "Student: ": "Estudiante: ",
+    "Approve": "Aprobar",
     "Evaluators assigned successfully.": "Evaluadores asignados exitosamente.",
     "Evaluation submitted successfully.": "Evaluación enviada exitosamente.",
 

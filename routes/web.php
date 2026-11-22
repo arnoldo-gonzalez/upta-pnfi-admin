@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AcademicCalendarController;
+use App\Http\Controllers\AdminProtocolTemplateController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EvaluationController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectDocumentController;
 use App\Http\Controllers\ProjectInvitationController;
+use App\Http\Controllers\ProtocolPreviewController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SectionController;
@@ -96,6 +98,8 @@ Route::middleware(['auth', 'role:admin|coordinador'])->group(function () {
     Route::delete('/teachers/{teacher}', [TeacherController::class, 'destroy'])->name('teachers.destroy');
 
     Route::get('/coordinator/protocols', [ProjectController::class, 'protocols'])->name('coordinator.protocols');
+    Route::get('/projects/{project}/protocol/download', [ProjectDocumentController::class, 'downloadRegenerated'])->name('projects.protocol.download');
+    Route::get('/coordinator/protocols/edit', [AdminProtocolTemplateController::class, 'show'])->name('coordinator.protocols.edit');
     Route::get('/coordinator/tutorships', [ProjectController::class, 'tutorships'])->name('coordinator.tutorships');
     Route::get('/coordinator/assign-tutors', [TutorController::class, 'assignDashboard'])->name('coordinator.assignTutors');
     Route::post('/coordinator/assign-tutors/{project}', [TutorController::class, 'manualAssign'])->name('coordinator.manualAssign');
@@ -109,6 +113,30 @@ Route::middleware(['auth', 'role:admin|coordinador'])->group(function () {
     Route::post('/academic-calendar/terms/{term}/activities', [AcademicCalendarController::class, 'storeActivity'])->name('calendar.storeActivity');
     Route::delete('/academic-calendar/activities/{activity}', [AcademicCalendarController::class, 'destroyActivity'])->name('calendar.destroyActivity');
 
+    // Rutas MVP: gestión de plantillas de protocolo
+    Route::get('/admin/protocolo/plantilla', [AdminProtocolTemplateController::class, 'show'])
+        ->name('admin.protocolo.plantilla');
+    Route::post('/admin/protocolo/plantilla', [AdminProtocolTemplateController::class, 'store'])
+        ->name('admin.protocolo.plantilla.store');
+    Route::patch('/admin/protocolo/plantilla/schema', [AdminProtocolTemplateController::class, 'updateSchema'])
+        ->name('admin.protocolo.plantilla.schema');
+
+});
+
+// Rutas para estudiante
+Route::middleware(['auth', 'role:estudiante'])->group(function () {
+
+    Route::get('/protocolo/llenar', [ProtocolPreviewController::class, 'create'])
+        ->name('protocolo.llenar');
+    Route::post('/protocolo/llenar/preview', [ProtocolPreviewController::class, 'preview'])
+        ->name('protocolo.llenar.preview');
+    Route::get('/projects/{project}/protocol/fill', [ProtocolPreviewController::class, 'fillProject'])
+        ->name('projects.protocol.fill');
+    Route::post('/projects/{project}/protocol/preview', [ProtocolPreviewController::class, 'previewProject'])
+        ->name('projects.protocol.preview');
+    Route::post('/projects/{project}/protocol/submit', [ProjectController::class, 'submitProtocol'])
+        ->name('projects.protocol.submit');
+
 });
 
 Route::middleware(['auth', 'role:admin|docente'])->group(function () {
@@ -120,6 +148,8 @@ Route::middleware(['auth', 'role:admin|docente'])->group(function () {
 
     Route::get('/my-evaluations/history', [EvaluationController::class, 'historyIndex'])->name('evaluations.teacher.history');
     Route::get('/my-evaluations/history/{project}', [EvaluationController::class, 'historyShow'])->name('evaluations.teacher.history.show');
+
+    Route::post('/evaluations/{evaluation}/field-correction', [EvaluationController::class, 'storeFieldCorrection'])->name('evaluations.teacher.field-correction');
 
     Route::get('/projects/{project}/evaluate', [TutorEvaluationController::class, 'create'])->name('tutor-evaluations.create');
     Route::post('/projects/{project}/evaluate', [TutorEvaluationController::class, 'store'])->name('tutor-evaluations.store');

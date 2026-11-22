@@ -12,13 +12,15 @@ use App\Models\InvestigationLine;
 use App\Models\ProjectInvitation;
 use App\Models\Enrollment;
 use App\Models\EvaluationStage;
+use App\Models\ProtocolTemplate;
 use App\Models\ProjectDocument;
 use App\Models\ProjectEvaluation;
+use App\Models\ProjectProtocolAnswer;
 use App\Models\User;
 use App\Notifications\EvaluatorAssigned;
+use App\Services\ProtocolDocxService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use ZipArchive;
 
 class ProjectController extends Controller
 {
@@ -167,9 +169,11 @@ class ProjectController extends Controller
 
     public function submitProtocol(Request $request, Project $project)
     {
-        $request->validate([
-            'protocol_file' => ['required', 'file', 'mimes:pdf', 'max:10240'],
-        ]);
+        $template = ProtocolTemplate::active();
+
+        if (! $template) {
+            return back()->with('error', 'No hay plantilla de protocolo configurada.');
+        }
 
         if (!AcademicActivity::isOpen('protocol_submission')) {
             // Si está fuera de fecha, verificamos si hay una solicitud aprobada
@@ -183,38 +187,17 @@ class ProjectController extends Controller
         }
         
         if (!in_array($project->status_id, [UserStatus::DRAFT->value, UserStatus::NEEDS_CORRECTIONS->value])) {
-            return back()->with('error', __('This project cannot be submitted at this time.'));
+            return back()->with('error', 'This project cannot be submitted at this time.');
         }
 
-        DB::transaction(function () use ($request, $project) {
-            
-            $file = $request->file('protocol_file');
-            $originalName = $file->getClientOriginalName();
-            $fileName = time() . '_' . pathinfo($originalName, PATHINFO_FILENAME) . '.zip';
-            
-            // 1. Guardar el archivo original temporalmente
-            $tempPath = $file->storeAs('temp', $originalName, 'local');
-            $absoluteTempPath = storage_path('app/private/' . $tempPath);
+        $docxService = new ProtocolDocxService();
+        $validated = $request->validate($docxService->validationRules($template));
 
-            // 2. Comprimir con ZipArchive
-            $zipPath = 'projects/' . $project->id . '/' . $fileName;
-            $absoluteZipPath = storage_path('app/public/' . $zipPath);
-            
-            // Asegurar que la carpeta exista
-            if (!file_exists(dirname($absoluteZipPath))) {
-                mkdir(dirname($absoluteZipPath), 0755, true);
-            }
+        DB::transaction(function () use ($project, $template, $validated, $docxService) {
+            // Generar docx y guardarlo en storage/app/private/protocols/
+            $relativePath = $docxService->generateToStorage($template, $validated, 'protocols');
 
-            $zip = new ZipArchive;
-            if ($zip->open($absoluteZipPath, ZipArchive::CREATE) === TRUE) {
-                $zip->addFile($absoluteTempPath, $originalName);
-                $zip->close();
-            }
-
-            // 3. Eliminar el archivo temporal original
-            unlink($absoluteTempPath);
-
-            // 4. Registrar en base de datos
+            // Crear ProjectDocument
             $protocolType = DocumentType::where('name', 'Protocolo')->first();
 
             $submissionCount = ProjectDocument::where('project_id', $project->id)
@@ -225,13 +208,23 @@ class ProjectController extends Controller
                 'project_id' => $project->id,
                 'document_type_id' => $protocolType->id,
                 'user_id' => auth()->id(),
-                'file_path' => $zipPath,
-                'submission_number' => $submissionCount, // <-- Guardamos el número
+                'file_path' => $relativePath,
+                'submission_number' => $submissionCount,
+                'protocol_template_id' => $template->id,
             ]);
 
-            // 5. Cambiar el estado a Pendiente y REINICIAR EVALUACIONES
+            // Guardar cada respuesta en project_protocol_answers
+            foreach ($validated as $key => $value) {
+                ProjectProtocolAnswer::create([
+                    'project_document_id' => $document->id,
+                    'placeholder_key' => $key,
+                    'value' => (string) $value,
+                ]);
+            }
+
+            // Cambiar el estado a PENDING y REINICIAR EVALUACIONES
             $project->update(['status_id' => UserStatus::PENDING->value]);
-            
+
             // Si es una reentrega, reseteamos a los mismos evaluadores
             $this->createNewEvaluationsForSubmission($project, $document);
         });
