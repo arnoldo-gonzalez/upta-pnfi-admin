@@ -18,7 +18,24 @@ class DashboardController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = auth()->user();
-        $data = [];
+
+        // Claves inicializadas para que la vista nunca reciba una clave indefinida,
+        // incluso si el usuario tiene más de un rol.
+        $data = [
+            'total_projects' => 0,
+            'pending_projects' => 0,
+            'approved_projects' => 0,
+            'active_sections' => 0,
+            'projects_by_track' => collect(),
+            'recent_logs' => collect(),
+            'pending_evaluations' => 0,
+            'tutoring_requests' => 0,
+            'my_tutor_projects' => 0,
+            'my_project' => null,
+            'pending_invitations' => 0,
+            'tutor_logs_count' => 0,
+            'last_log' => null,
+        ];
 
         // 1. DATOS PARA COORDINADORES Y ADMINS (Vista Global)
         if ($user->hasAnyRole(['admin', 'coordinador'])) {
@@ -27,19 +44,21 @@ class DashboardController extends Controller
             $data['approved_projects'] = Project::where('status_id', UserStatus::ACTIVE->value)->count();
             $data['active_sections'] = Section::where('is_active', true)->count();
             
-            // Proyectos por trayecto (para una gráfica o lista)
-            $data['projects_by_track'] = Project::with('section.trayecto')
-                ->get()
-                ->groupBy('section.trayecto.name')
-                ->map
-            ->count();
+            // Proyectos por trayecto (agregado en BD, sin cargar todos los modelos).
+            $data['projects_by_track'] = Project::query()
+                ->join('sections', 'projects.section_id', '=', 'sections.id')
+                ->join('trayectos', 'sections.trayecto_id', '=', 'trayectos.id')
+                ->selectRaw('trayectos.name as track, count(*) as total')
+                ->groupBy('trayectos.name')
+                ->pluck('total', 'track');
                 
             // Últimas 5 minutas de tutoría (actividades recientes)
             $data['recent_logs'] = TutorLog::with('project', 'student')->latest()->take(5)->get();
         }
 
-        // 2. DATOS PARA DOCENTES (Tutor / Evaluador)
-        elseif ($user->hasRole('docente')) {
+        // 2. DATOS PARA DOCENTES (Tutor / Evaluador). Se calculan también si el
+        // usuario comparte roles de coordinación.
+        if ($user->hasRole('docente')) {
             $data['pending_evaluations'] = ProjectEvaluation::where('user_id', $user->id)
                 ->where('status_id', UserStatus::PENDING->value)
             ->count();
@@ -54,7 +73,7 @@ class DashboardController extends Controller
         }
 
         // 3. DATOS PARA ESTUDIANTES
-        elseif ($user->hasRole('estudiante')) {
+        if ($user->hasRole('estudiante')) {
             $enrollment = $user->enrollments()->where('is_active', true)->first();
             
             $data['my_project'] = null;
@@ -84,13 +103,17 @@ class DashboardController extends Controller
         }
 
         // 4. LÓGICA DEL CALENDARIO (Filtrada por Rol)
-        $userRole = $user->getRoleNames()->first();
+        $userRoles = $user->getRoleNames()->all();
 
         $eventsQuery = Event::where('start_date', '>=', now()->startOfMonth())->orderBy('start_date', 'asc');
 
-        // Si NO es admin, filtramos por su rol en el JSON
-        if (!$user->hasRole('admin')) {
-            $eventsQuery->whereJsonContains('visible_to_roles', $userRole);
+        // Si NO es admin, mostramos los eventos visibles para cualquiera de sus roles.
+        if (! $user->hasRole('admin')) {
+            $eventsQuery->where(function ($query) use ($userRoles) {
+                foreach ($userRoles as $role) {
+                    $query->orWhereJsonContains('visible_to_roles', $role);
+                }
+            });
         }
 
         $events = $eventsQuery->get();

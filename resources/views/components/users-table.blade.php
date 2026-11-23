@@ -8,6 +8,10 @@
     'showAcademicInfo' => false
 ])
 
+@php
+    $entityLabel = $routePrefix === 'students' ? __('Student') : __('Teacher');
+@endphp
+
 <div {{ $attributes->merge(['class' => 'overflow-x-auto']) }}>
     <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-upta-50">
@@ -121,8 +125,8 @@
 
                                 <x-confirm-delete 
                                     :action="route($routePrefix . '.destroy', $user->id)" 
-                                    title="Delete Teacher"
-                                    message="Are you sure you want to delete this teacher? This action cannot be undone." 
+                                    :title="__('Delete') . ' ' . $entityLabel"
+                                    :message="__('Are you sure you want to delete this record? This action cannot be undone.')"
                                 />
                             </div>
                         @endif
@@ -131,7 +135,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="px-6 py-10 text-center text-gray-500">
+                    <td colspan="{{ $showAcademicInfo ? 6 : 5 }}" class="px-6 py-10 text-center text-gray-500">
                         <p class="text-sm font-medium">{{ __('No records found for this role.') }}</p>
                     </td>
                 </tr>

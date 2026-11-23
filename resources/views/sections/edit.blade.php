@@ -50,6 +50,27 @@
                     @enderror
                 </div>
 
+                <!-- Periodo -->
+                <div class="mb-4">
+                    <label for="period" class="block text-sm font-medium text-gray-700">{{ __('Period') }}</label>
+                    <input type="text" name="period" id="period" value="{{ old('period', $section->period) }}"
+                           placeholder="2026-2027"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" required>
+                    @error('period')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Activa -->
+                <div class="mb-6">
+                    <label for="is_active" class="inline-flex items-center">
+                        <input type="checkbox" name="is_active" id="is_active" value="1"
+                               {{ old('is_active', $section->is_active) ? 'checked' : '' }}
+                               class="rounded border-gray-300 text-upta-600 shadow-sm focus:ring-upta-500">
+                        <span class="ms-2 text-sm text-gray-700">{{ __('Active section') }}</span>
+                    </label>
+                </div>
+
                 <!-- Asesor -->
                 <div class="mb-6">
                     <label for="teacher_id" class="block text-sm font-medium text-gray-700">{{ __('Advisor (Teacher)') }}</label>

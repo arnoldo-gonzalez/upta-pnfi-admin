@@ -31,7 +31,7 @@ El sistema está estructurado en cuatro procesos funcionales clave:
 
 Asegúrate de tener instalado lo siguiente en tu entorno de desarrollo:
 
-*   [PHP >= 8.2](https://www.php.net/)
+*   [PHP >= 8.3](https://www.php.net/)
 *   [Composer](https://getcomposer.org/)
 *   [Node.js y NPM](https://nodejs.org/)
 *   [PostgreSQL](https://www.postgresql.org/)
@@ -78,8 +78,9 @@ Sigue estos pasos para levantar el proyecto en tu máquina:
 6. **Ejecutar las migraciones (y seeders si están disponibles):**
    ```bash
    php artisan migrate --seed
+   php artisan storage:link
    ```
-   *(Nota: El flag `--seed` es opcional, úsalo si necesitas poblar la base de datos con datos de prueba).*
+   *(Nota: El flag `--seed` es opcional, úsalo si necesitas poblar la base de datos con datos de prueba. Los usuarios de prueba usan la contraseña `password`; cámbiala en producción).*
 
 7. **Compilar los assets y levantar el servidor:**
    En dos terminales distintas, ejecuta:
@@ -94,9 +95,17 @@ Sigue estos pasos para levantar el proyecto en tu máquina:
 8. **Acceder a la aplicación:**
    Abre tu navegador e ingresa a `http://localhost:8000`
 
+9. **Configuración inicial (obligatoria para operar):**
+   Con la cuenta de administrador (`admin@uptamcy.com` / `password`):
+   - Sube la plantilla `.docx` del protocolo en **Administración → Plantilla de protocolo**. Sin plantilla activa no se pueden enviar protocolos.
+   - Crea el trimestre y las ventanas de `protocol_submission` y `tutor_request` en **Calendario académico**. Sin ventana vigente, el sistema considera el plazo cerrado.
+   - Crea la sección y asígnale un asesor en **Secciones**.
+
+> Zona horaria: el sistema usa `APP_TIMEZONE=America/Caracas` por defecto. Ajusta `APP_URL` si se despliega en un subdirectorio.
+
 ## 🧪 Pruebas
 
-Para ejecutar las pruebas automatizadas del sistema:
+Para ejecutar las pruebas automatizadas del sistema (usan SQLite en memoria, no tocan la base de datos real):
 ```bash
 php artisan test
 ```

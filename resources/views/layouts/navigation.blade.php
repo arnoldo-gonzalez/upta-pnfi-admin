@@ -25,7 +25,20 @@
                 {{ __('Dashboard') }}
             </a>
 
+            <a href="{{ route('cartelera.index') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('cartelera.*') ? 'bg-upta-700 text-white' : 'text-upta-100 hover:bg-upta-800 hover:text-white' }}">
+                <svg class="mr-3 h-5 w-5 text-upta-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                {{ __('Cartelera') }}
+            </a>
+
             @role('admin')
+                <a href="{{ route('admin.users.index') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.users.*') ? 'bg-upta-700 text-white' : 'text-upta-100 hover:bg-upta-800 hover:text-white' }}">
+                    <svg class="mr-3 h-5 w-5 text-upta-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    {{ __('Usuarios') }}
+                </a>
+                <a href="{{ route('admin.backups.index') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.backups.*') ? 'bg-upta-700 text-white' : 'text-upta-100 hover:bg-upta-800 hover:text-white' }}">
+                    <svg class="mr-3 h-5 w-5 text-upta-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1.5 3 4 3h8c2.5 0 4-1 4-3V7c0-2-1.5-3-4-3H8C5.5 4 4 5 4 7zm0 0h16M8 11h8M8 15h5"></path></svg>
+                    {{ __('Respaldos') }}
+                </a>
                 <a href="{{ route('audit.index') }}" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('audit.*') ? 'bg-upta-700 text-white' : 'text-upta-100 hover:bg-upta-800 hover:text-white' }}">
                     <svg class="mr-3 h-5 w-5 text-upta-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     {{ __('Audit Logs') }}
@@ -161,7 +174,7 @@
 
         <!-- Campana de Notificaciones -->
         @php
-            $unreadNotifications = auth()->user()->unreadNotifications;
+            $unreadNotifications = auth()->user()->unreadNotifications()->take(5)->get();
         @endphp
         
         <div class="relative" x-data="{ openNotifications: false }">
@@ -205,10 +218,13 @@
                 <!-- Lista de notificaciones -->
                 <div class="max-h-64 overflow-y-auto">
                     @forelse($unreadNotifications as $notification)
-                        <a href="{{ route('notifications.read', $notification->id) }}" class="block p-4 border-b hover:bg-gray-50 transition-colors">
-                            <p class="text-sm font-bold text-gray-800">{{ $notification->data['title'] }}</p>
-                            <p class="text-xs text-gray-600 mt-1 line-clamp-2">{{ $notification->data['message'] }}</p>
-                        </a>
+                        <form action="{{ route('notifications.read', $notification->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="w-full text-left block p-4 border-b hover:bg-gray-50 transition-colors">
+                                <p class="text-sm font-bold text-gray-800">{{ $notification->data['title'] }}</p>
+                                <p class="text-xs text-gray-600 mt-1 line-clamp-2">{{ $notification->data['message'] }}</p>
+                            </button>
+                        </form>
                     @empty
                         <p class="p-4 text-sm text-gray-500 text-center">{{ __('No new notifications') }}</p>
                     @endforelse

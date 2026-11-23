@@ -26,10 +26,26 @@ class AdminProtocolTemplateController extends Controller
         $file = $request->file('protocol_template');
         $filePath = Str::uuid() . '/plantilla.docx';
 
-        Storage::disk('local')->putFileAs('protocol_templates', $file, $filePath);
+        if (! Storage::disk('local')->putFileAs('protocol_templates', $file, $filePath)) {
+            return back()->with('error', 'No se pudo guardar la plantilla. Inténtalo de nuevo.');
+        }
 
         $src = Storage::disk('local')->path('protocol_templates/' . $filePath);
-        $variables = $this->getVariablesFromFile($src);
+
+        try {
+            $variables = $this->getVariablesFromFile($src);
+        } catch (\Throwable $e) {
+            Storage::disk('local')->delete('protocol_templates/' . $filePath);
+            report($e);
+
+            return back()->with('error', 'El archivo no es un .docx válido o está dañado.');
+        }
+
+        if ($variables === []) {
+            Storage::disk('local')->delete('protocol_templates/' . $filePath);
+
+            return back()->with('error', 'La plantilla no contiene variables {{...}}. Agrega al menos una antes de subirla.');
+        }
 
         $normalized = [];
         foreach ($variables as $var) {
@@ -52,15 +68,17 @@ class AdminProtocolTemplateController extends Controller
             ];
         }
 
-        ProtocolTemplate::query()->update(['activo' => false]);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($file, $filePath, $schema) {
+            ProtocolTemplate::query()->update(['activo' => false]);
 
-        ProtocolTemplate::create([
-            'nombre' => $file->getClientOriginalName(),
-            'docx_path' => $filePath,
-            'schema_json' => $schema,
-            'activo' => true,
-            'created_by' => auth()->id(),
-        ]);
+            ProtocolTemplate::create([
+                'nombre' => $file->getClientOriginalName(),
+                'docx_path' => $filePath,
+                'schema_json' => $schema,
+                'activo' => true,
+                'created_by' => auth()->id(),
+            ]);
+        });
 
         return redirect()->route('admin.protocolo.plantilla')
             ->with('success', 'Plantilla subida y analizada correctamente.');
@@ -94,7 +112,7 @@ class AdminProtocolTemplateController extends Controller
 
             $schema[] = [
                 'key' => $field['key'],
-                'label' => $field['label'] !== '' && $field['label'] !== null ? $field['label'] : $field['key'],
+                'label' => ! empty($field['label']) ? $field['label'] : $field['key'],
                 'type' => $field['type'],
                 'required' => ! empty($field['required']) && $field['required'] === '1',
                 'maxChars' => isset($field['maxChars']) && $field['maxChars'] !== null && $field['maxChars'] !== ''
@@ -187,7 +205,7 @@ class AdminProtocolTemplateController extends Controller
 
                     // 1) Buscar placeholders contiguos dentro de cada <w:t>.
                     foreach ($texts as $t) {
-                        if (preg_match_all('/\{\{\s*([A-Z0-9_]+)\s*\}\}/', $t, $m)) {
+                        if (preg_match_all('/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/', $t, $m)) {
                             foreach ($m[1] as $match) {
                                 $found[] = $match;
                             }
@@ -207,7 +225,7 @@ class AdminProtocolTemplateController extends Controller
                             continue;
                         }
                         $plain = implode('', $pTexts[1]);
-                        if (preg_match_all('/\{\{\s*([A-Z0-9_]+)\s*\}\}/', $plain, $m)) {
+                        if (preg_match_all('/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/', $plain, $m)) {
                             foreach ($m[1] as $match) {
                                 $found[] = $match;
                             }
@@ -219,7 +237,7 @@ class AdminProtocolTemplateController extends Controller
                     //    o estructuras raras). El regex estricto limita el riesgo.
                     if (empty($found)) {
                         $plain = implode('', $texts);
-                        if (preg_match_all('/\{\{\s*([A-Z0-9_]+)\s*\}\}/', $plain, $m)) {
+                        if (preg_match_all('/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/', $plain, $m)) {
                             foreach ($m[1] as $match) {
                                 $found[] = $match;
                             }

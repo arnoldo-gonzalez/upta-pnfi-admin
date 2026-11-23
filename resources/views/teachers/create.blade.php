@@ -35,6 +35,26 @@
                         <input type="number" name="phone" value="{{ old('phone') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" required>
                         @error('phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
+                    <!-- Especialidad -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ __('Especialidad') }}</label>
+                        <input type="text" name="specialty" value="{{ old('specialty') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" placeholder="{{ __('Ej.: Desarrollo de software') }}">
+                        @error('specialty') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <!-- Disponibilidad -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ __('Disponibilidad horaria') }}</label>
+                        <input type="text" name="availability" value="{{ old('availability') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" placeholder="{{ __('Ej.: Lunes a viernes, 8:00 a.m. a 12:00 m.') }}">
+                        @error('availability') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <input type="hidden" name="jury_available" value="0">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" name="jury_available" value="1" class="rounded border-gray-300 text-upta-600 shadow-sm focus:ring-upta-500" {{ old('jury_available', true) ? 'checked' : '' }}>
+                        <span class="ml-2 text-sm text-gray-700">{{ __('Disponible para actuar como jurado') }}</span>
+                    </label>
                 </div>
 
                 <!-- Contraseña -->

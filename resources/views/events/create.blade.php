@@ -10,7 +10,17 @@
         <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200">
             <form action="{{ route('events.store') }}" method="POST">
                 @csrf
-                
+
+                @if($errors->any())
+                    <div class="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                        <ul class="list-disc pl-5 text-sm space-y-1">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">{{ __('Event Title') }}</label>
@@ -20,15 +30,31 @@
                         <label class="block text-sm font-medium text-gray-700">{{ __('Event Type') }}</label>
                         <select name="event_type_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" required>
                             @foreach($eventTypes as $type)
-                                <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                <option value="{{ $type->id }}" {{ old('event_type_id') == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ __('Date & Time') }}</label>
+                        <input type="datetime-local" name="start_date" value="{{ old('start_date') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ __('Location / Link') }}</label>
+                        <input type="text" name="location" value="{{ old('location') }}" placeholder="{{ __('Aula, salón o enlace virtual') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500">
+                    </div>
+                </div>
+
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">{{ __('Date & Time') }}</label>
-                    <input type="datetime-local" name="start_date" value="{{ old('start_date') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" required>
+                    <label class="block text-sm font-medium text-gray-700">{{ __('Project (optional)') }}</label>
+                    <select name="project_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500">
+                        <option value="">{{ __('No project (general event)') }}</option>
+                        @foreach($projects as $project)
+                            <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>{{ $project->title }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="mb-4">
@@ -37,7 +63,7 @@
                 </div>
 
                 <!-- VISIBILIDAD Y ENLACES (Alpine.js) -->
-                <div class="mb-6 border-t border-gray-100 pt-4" x-data="{ selectedRoles: [] }">
+                <div class="mb-6 border-t border-gray-100 pt-4" x-data="{ selectedRoles: @js(array_values(old('visible_to_roles', []))) }">
                     <label class="block text-sm font-bold text-gray-800 mb-2">{{ __('Visibility & Links') }}</label>
                     <p class="text-xs text-gray-500 mb-3">{{ __('Select who can see this event. You can optionally link them to a specific module.') }}</p>
 
@@ -45,8 +71,10 @@
                         @foreach($roles as $role)
                             <div class="bg-gray-50 p-3 rounded border border-gray-200">
                                 <label class="inline-flex items-center">
-                                    <input type="checkbox" name="visible_to_roles[]" value="{{ $role }}" 
-                                           x-model="selectedRoles" class="rounded border-gray-300 text-upta-600 shadow-sm focus:ring-upta-500">
+                                    <input type="checkbox" name="visible_to_roles[]" value="{{ $role }}"
+                                           x-model="selectedRoles"
+                                           {{ in_array($role, old('visible_to_roles', [])) ? 'checked' : '' }}
+                                           class="rounded border-gray-300 text-upta-600 shadow-sm focus:ring-upta-500">
                                     <span class="ml-2 text-sm font-medium text-gray-700 capitalize">{{ __($role) }}</span>
                                 </label>
 

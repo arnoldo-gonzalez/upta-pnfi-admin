@@ -19,6 +19,12 @@ class Project extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'allow_late_submission' => 'boolean',
+        'written_score' => 'float',
+        'technical_score' => 'float',
+    ];
+
     public function status(): BelongsTo { 
         return $this->belongsTo(Status::class); 
     }

@@ -107,7 +107,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="px-6 py-10 text-center text-gray-500">
+                            <td colspan="5" class="px-6 py-10 text-center text-gray-500">
                                 {{ __('No sections found.') }}
                             </td>
                         </tr>

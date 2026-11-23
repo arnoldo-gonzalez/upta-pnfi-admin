@@ -23,9 +23,18 @@
                             <td class="px-6 py-4">
                                 <div class="text-sm font-medium text-gray-900">{{ $event->title }}</div>
                                 <div class="text-xs text-gray-500">{{ $event->type->name ?? 'General' }}</div>
+                                @if($event->description)
+                                    <div class="text-xs text-gray-600 mt-1">{{ $event->description }}</div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ \Carbon\Carbon::parse($event->start_date)->format('d/m/Y h:i A') }}
+                                @if($event->location)
+                                    <div class="text-xs text-gray-400">{{ $event->location }}</div>
+                                @endif
+                                @if($event->project)
+                                    <div class="text-xs text-upta-600">{{ $event->project->title }}</div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500">
                                 <div class="flex flex-wrap gap-1">
@@ -35,7 +44,12 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <x-confirm-delete :action="route('events.destroy', $event)" title="Delete Event" message="Are you sure you want to delete this event?" />
+                                <div class="flex items-center justify-center gap-2">
+                                    <a href="{{ route('events.edit', $event) }}" class="text-upta-600 hover:text-upta-800 text-xs font-semibold">
+                                        {{ __('Edit') }}
+                                    </a>
+                                    <x-confirm-delete :action="route('events.destroy', $event)" title="Delete Event" message="Are you sure you want to delete this event?" />
+                                </div>
                             </td>
                         </tr>
                     @empty

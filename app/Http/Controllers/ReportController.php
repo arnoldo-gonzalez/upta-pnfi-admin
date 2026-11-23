@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\Project;
 use App\Models\User;
 use App\Enums\UserStatus;
@@ -17,6 +18,8 @@ class ReportController extends Controller
         if (!in_array($report, $validReports)) {
             abort(404, 'Report not found');
         }
+
+        AuditLog::record('generate_report', 'Generó el reporte: ' . $report . '.');
 
         return match($report) {
             'protocols' => $this->printProtocols(),

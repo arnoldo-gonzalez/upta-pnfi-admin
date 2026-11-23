@@ -16,7 +16,13 @@ class ProtocolDocxService
      */
     public function generate(ProtocolTemplate $template, array $values): string
     {
-        $src = Storage::disk('local')->path('protocol_templates/' . $template->docx_path);
+        $relative = 'protocol_templates/' . $template->docx_path;
+
+        if (! Storage::disk('local')->exists($relative)) {
+            throw new \RuntimeException('No se encontró el archivo de la plantilla de protocolo.');
+        }
+
+        $src = Storage::disk('local')->path($relative);
 
         Settings::setOutputEscapingEnabled(true);
 
@@ -44,13 +50,18 @@ class ProtocolDocxService
     {
         $tmp = $this->generate($template, $values);
 
-        $relative = $directory . '/' . Str::uuid() . '.docx';
+        try {
+            $relative = $directory . '/' . Str::uuid() . '.docx';
+            $contents = file_get_contents($tmp);
 
-        Storage::disk('local')->put($relative, file_get_contents($tmp));
+            if ($contents === false || ! Storage::disk('local')->put($relative, $contents)) {
+                throw new \RuntimeException('No se pudo guardar el protocolo generado.');
+            }
 
-        @unlink($tmp);
-
-        return $relative;
+            return $relative;
+        } finally {
+            @unlink($tmp);
+        }
     }
 
     /**
@@ -62,6 +73,10 @@ class ProtocolDocxService
 
         $rules = [];
         foreach ($placeholders as $campo) {
+            if (empty($campo['key'])) {
+                continue;
+            }
+
             $key = $campo['key'];
             $rules[$key] = [];
 
@@ -77,7 +92,9 @@ class ProtocolDocxService
                 'date' => 'date',
                 'tel' => 'regex:/^\+?[\d\s\-().]{7,20}$/',
                 'cedula' => 'regex:/^[VE]-?\d{1,2}\.?\d{3}\.?\d{3}$/i',
-                'select' => 'in:' . implode(',', $campo['options'] ?? []),
+                'select' => empty($campo['options'])
+                    ? 'string'
+                    : 'in:' . implode(',', $campo['options']),
                 default => 'string',
             };
 
@@ -141,7 +158,7 @@ class ProtocolDocxService
 
         // 1) Buscar placeholders contiguos en <w:t> individuales
         $xml = preg_replace_callback(
-            '/\{\{\s*([A-Z0-9_]+)\s*\}\}/',
+            '/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/',
             $replacer,
             $xml
         );
@@ -163,9 +180,9 @@ class ProtocolDocxService
         // 3) Fallback global: unir todos los <w:t> y buscar
         if (preg_match_all('/<w:t[^>]*>(.*?)<\/w:t>/s', $xml, $tm)) {
             $plain = implode('', $tm[1]);
-            if (preg_match('/\{\{\s*([A-Z0-9_]+)\s*\}\}/', $plain)) {
+            if (preg_match('/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/', $plain)) {
                 $xml = preg_replace_callback(
-                    '/\{\{\s*([A-Z0-9_]+)\s*\}\}/',
+                    '/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/',
                     $replacer,
                     $xml
                 );
@@ -205,7 +222,7 @@ class ProtocolDocxService
                 $closeTag = $m[3];
 
                 // Solo procesar si el párrafo es justificado Y contiene <w:br/>
-                if (! preg_match('/<w:jc\s+w:val\s*=\s*"both"/', $openTag)) {
+                if (! preg_match('/<w:jc\s+w:val\s*=\s*"both"/', $inner)) {
                     return $m[0];
                 }
                 if (strpos($inner, '<w:br/>') === false) {
@@ -360,7 +377,7 @@ class ProtocolDocxService
         }
 
         // 2) Encontrar todos los placeholders en el texto plano del párrafo.
-        if (! preg_match_all('/\{\{\s*([A-Z0-9_]+)\s*\}\}/', $paraText, $pm, PREG_OFFSET_CAPTURE)) {
+        if (! preg_match_all('/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/', $paraText, $pm, PREG_OFFSET_CAPTURE)) {
             return $inner;
         }
 

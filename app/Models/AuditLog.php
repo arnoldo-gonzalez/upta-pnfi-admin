@@ -11,6 +11,13 @@ class AuditLog extends Model
 {
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        // La auditoría es append-only: no se edita ni se elimina desde la app.
+        static::updating(fn () => false);
+        static::deleting(fn () => false);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

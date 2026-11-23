@@ -45,7 +45,7 @@
                             
                             @php
                                 $teachersJson = $availableTeachers->map(function($t) {
-                                    return ['id' => $t->id, 'name' => $t->name];
+                                    return ['id' => $t->id, 'name' => $t->name, 'specialty' => $t->specialty];
                                 });
                             @endphp
 
@@ -82,6 +82,7 @@
                                     <template x-for="teacher in filteredTeachers" :key="teacher.id">
                                         <li @click="selectTeacher(teacher.id, teacher.name)" class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-upta-50 text-gray-900">
                                             <span x-text="teacher.name" class="font-medium"></span>
+                                            <span class="block text-xs text-gray-500" x-text="teacher.specialty || '{{ __('Especialidad no registrada') }}'"></span>
                                         </li>
                                     </template>
                                     <li x-show="filteredTeachers.length === 0" class="cursor-default select-none relative py-2 pl-3 pr-9 text-gray-500 text-sm">

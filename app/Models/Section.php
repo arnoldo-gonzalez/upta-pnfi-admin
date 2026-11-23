@@ -30,6 +30,11 @@ class Section extends Model
         return $this->hasMany(Enrollment::class);
     }
 
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
     public function teachers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'section_teacher')

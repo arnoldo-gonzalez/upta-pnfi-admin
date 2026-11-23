@@ -43,6 +43,7 @@
                         <th class="px-6 py-3 text-left text-xs font-bold text-upta-900 uppercase">{{ __('Project') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-bold text-upta-900 uppercase">{{ __('Section') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-bold text-upta-900 uppercase">{{ __('Tutor Assigned') }}</th>
+                        <th class="px-6 py-3 text-center text-xs font-bold text-upta-900 uppercase">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -62,11 +63,16 @@
                                 {{ $project->section->name }} - {{ $project->section->trayecto->name }} ({{ $project->section->period }})
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                                {{ $project->tutor->name }}
+                                {{ $project->tutor?->name ?? __('No tutor') }}
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="{{ route('coordinator.tutor-logs', $project) }}" class="text-upta-600 hover:text-upta-800 text-xs font-semibold">
+                                    {{ __('Ver bitácoras') }}
+                                </a>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="3" class="px-6 py-10 text-center text-gray-500">{{ __('No projects with assigned tutors found.') }}</td></tr>
+                        <tr><td colspan="4" class="px-6 py-10 text-center text-gray-500">{{ __('No projects with assigned tutors found.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

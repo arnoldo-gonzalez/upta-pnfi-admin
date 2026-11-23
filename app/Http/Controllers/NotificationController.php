@@ -18,7 +18,7 @@ class NotificationController extends Controller
         $notification->markAsRead();
 
         // Redirigimos a la URL que guardamos en los datos de la notificación
-        return redirect($notification->data['url']);
+        return redirect()->to(data_get($notification->data, 'url', route('dashboard')));
     }
 
     /**
@@ -26,8 +26,8 @@ class NotificationController extends Controller
      */
     public function markAllAsRead()
     {
-        Auth::user()->unreadNotifications->markAsRead();
-        
+        Auth::user()->unreadNotifications()->update(['read_at' => now()]);
+
         return back()->with('success', __('All notifications marked as read.'));
     }
 }

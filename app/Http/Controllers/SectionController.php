@@ -24,16 +24,22 @@ class SectionController extends Controller
     public function create()
     {
         $trayectos = Trayecto::orderBy('number')->get();
-        $teachers = User::role('docente')->orderBy('name')->get(); 
-        
+        $teachers = User::role('docente')
+            ->where('status_id', \App\Enums\UserStatus::ACTIVE->value)
+            ->orderBy('name')
+            ->get();
+
         return view('sections.create', compact('trayectos', 'teachers'));
     }
 
     public function edit(Section $section)
     {
         $trayectos = Trayecto::orderBy('number')->get();
-        $teachers = User::role('docente')->orderBy('name')->get(); 
-        
+        $teachers = User::role('docente')
+            ->where('status_id', \App\Enums\UserStatus::ACTIVE->value)
+            ->orderBy('name')
+            ->get();
+
         $activeTeacher = $section->teachers()->wherePivot('is_active', true)->first();
         $activeTeacherId = $activeTeacher ? $activeTeacher->id : null;
         
@@ -46,38 +52,42 @@ class SectionController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'max_team_size' => ['required', 'integer', 'min:1'],
             'trayecto_id' => ['required', 'exists:trayectos,id'],
-            'teacher_id' => ['nullable', 'exists:users,id'], 
+            'period' => ['required', 'string', 'max:20'],
+            'is_active' => ['nullable', 'boolean'],
+            'teacher_id' => ['nullable', 'exists:users,id'],
         ]);
+
+        if ($request->filled('teacher_id') && ! User::role('docente')
+            ->where('status_id', \App\Enums\UserStatus::ACTIVE->value)
+            ->whereKey($request->teacher_id)
+            ->exists()) {
+            return back()->withInput()->withErrors(['teacher_id' => __('The selected user is not an active teacher.')]);
+        }
 
         $section->update([
             'name' => $request->name,
             'trayecto_id' => $request->trayecto_id,
             'max_team_size' => $request->max_team_size,
+            'period' => $request->period,
+            'is_active' => $request->has('is_active') ? $request->boolean('is_active') : $section->is_active,
         ]);
 
-        // Si se seleccionó un docente, verificamos si es diferente al actual
-        if ($request->filled('teacher_id')) {
-            
-            // Buscamos quién es el docente activo actualmente
-            $currentActiveTeacher = $section->teachers()->wherePivot('is_active', true)->first();
+        $currentActiveTeacher = $section->teachers()->wherePivot('is_active', true)->first();
+        $newTeacherId = $request->filled('teacher_id') ? (int) $request->teacher_id : null;
 
-            // Solo hacemos el cambio si el docente seleccionado es distinto al actual
-            if (!$currentActiveTeacher || $currentActiveTeacher->id !== $request->teacher_id) {
-                
-                // 1. Desactivamos a TODOS los docentes que estén activos en esta sección
-                $section->teachers()->updateExistingPivot(
-                    $section->teachers()->wherePivot('is_active', true)->pluck('users.id')->toArray(),
-                    ['is_active' => false]
-                );
+        // Solo se toca el pivote si el asesor realmente cambió (o se quitó).
+        if (! $currentActiveTeacher || $currentActiveTeacher->id !== $newTeacherId) {
+            $section->teachers()->updateExistingPivot(
+                $section->teachers()->wherePivot('is_active', true)->pluck('users.id')->toArray(),
+                ['is_active' => false]
+            );
 
-                // 2. Usamos attach() para crear un NUEVO registro histórico (nuevo ID)
-                $section->teachers()->attach($request->teacher_id, [
-                    'is_active' => true
-                ]);
-                
+            if ($newTeacherId) {
+                $section->teachers()->attach($newTeacherId, ['is_active' => true]);
             }
-            
         }
+
+        AuditLog::record('update_section', 'Editó la sección ' . $section->name . ' del periodo ' . $section->period);
 
         return redirect()->route('sections.index')->with('success', __('Section updated successfully.'));
     }
@@ -87,7 +97,14 @@ class SectionController extends Controller
      */
     public function destroy(Section $section)
     {
+        if ($section->projects()->exists() || $section->enrollments()->exists()) {
+            return back()->with('error', __('This section has projects or enrollments and cannot be deleted. Close the period instead.'));
+        }
+
+        $name = $section->name;
         $section->delete();
+
+        AuditLog::record('delete_section', 'Eliminó la sección ' . $name);
 
         return redirect()->route('sections.index')->with('success', __('Section deleted successfully.'));
     }
@@ -102,6 +119,13 @@ class SectionController extends Controller
             'teacher_id' => ['nullable', 'exists:users,id'],
             'period' => ['required', 'string', 'max:20'],
         ]);
+
+        if ($request->filled('teacher_id') && ! User::role('docente')
+            ->where('status_id', \App\Enums\UserStatus::ACTIVE->value)
+            ->whereKey($request->teacher_id)
+            ->exists()) {
+            return back()->withInput()->withErrors(['teacher_id' => __('The selected user is not an active teacher.')]);
+        }
 
         $section = Section::create([
             'name' => $request->name,
@@ -120,12 +144,37 @@ class SectionController extends Controller
         return redirect()->route('sections.index')->with('success', __('Section created successfully.'));
     }
 
-    // Cerrar todas las secciones activas (sin importar el periodo, cerrará las que estén abiertas)
+    // Cerrar las secciones activas de un periodo (o todas si no se indica)
     public function closePeriod(Request $request)
     {
-        Section::where('is_active', true)->update(['is_active' => false]);
+        $request->validate([
+            'period' => ['nullable', 'string', 'max:20'],
+        ]);
 
-        return redirect()->route('sections.index')->with('success', __('All active sections have been closed.'));
+        $period = $request->input('period');
+
+        $sections = Section::where('is_active', true)
+            ->when($period, fn ($query) => $query->where('period', $period))
+            ->get();
+
+        if ($sections->isEmpty()) {
+            return back()->with('error', __('There are no active sections to close.'));
+        }
+
+        DB::transaction(function () use ($sections) {
+            foreach ($sections as $section) {
+                $section->update(['is_active' => false]);
+
+                // Cerrar también las inscripciones para que no sigan contando como activas.
+                $section->enrollments()
+                    ->where('is_active', true)
+                    ->update(['is_active' => false, 'completed_at' => now()]);
+            }
+        });
+
+        AuditLog::record('close_period', 'Cerró ' . $sections->count() . ' sección(es)' . ($period ? ' del periodo ' . $period : '') . '.');
+
+        return redirect()->route('sections.index')->with('success', __('The selected sections and their enrollments have been closed.'));
     }
 
     // Clonar secciones de un periodo a otro
@@ -136,23 +185,45 @@ class SectionController extends Controller
             'new_period' => ['required', 'string', 'different:current_period'],
         ]);
 
-        $currentSections = Section::where('period', $request->current_period)->get();
+        $currentSections = Section::with('activeTeacher')->where('period', $request->current_period)->get();
 
         if ($currentSections->isEmpty()) {
             return back()->with('error', __('No sections found for the period :period.', ['period' => $request->current_period]));
         }
 
-        DB::transaction(function () use ($currentSections, $request) {
+        $created = 0;
+
+        DB::transaction(function () use ($currentSections, $request, &$created) {
             foreach ($currentSections as $section) {
-                Section::create([
+                // Evitar duplicados si se pulsa "clonar" dos veces.
+                $exists = Section::where('name', $section->name)
+                    ->where('trayecto_id', $section->trayecto_id)
+                    ->where('period', $request->new_period)
+                    ->exists();
+
+                if ($exists) {
+                    continue;
+                }
+
+                $newSection = Section::create([
                     'name' => $section->name,
                     'trayecto_id' => $section->trayecto_id,
                     'max_team_size' => $section->max_team_size,
                     'period' => $request->new_period,
                     'is_active' => true,
                 ]);
+
+                // Copiar el asesor activo para que la nueva sección sea usable.
+                $advisor = $section->activeTeacher->first();
+                if ($advisor) {
+                    $newSection->teachers()->attach($advisor->id, ['is_active' => true]);
+                }
+
+                $created++;
             }
         });
+
+        AuditLog::record('clone_period', 'Clonó ' . $created . ' sección(es) al periodo ' . $request->new_period . '.');
 
         return redirect()->route('sections.index')->with('success', __('Sections cloned to period :period successfully.', ['period' => $request->new_period]));
     }

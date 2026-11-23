@@ -1,6 +1,16 @@
 <x-app-layout>
-    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8" x-data="{ openTermForm: false }">
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8" x-data="{ openTermForm: {{ $errors->any() ? 'true' : 'false' }} }">
         
+        @if($errors->any())
+            <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                <ul class="list-disc pl-5 text-sm space-y-1">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <!-- Encabezado y Botón de Nuevo Trimestre -->
         <div class="flex justify-between items-center mb-6">
             <div>

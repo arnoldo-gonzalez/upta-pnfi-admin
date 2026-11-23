@@ -8,7 +8,8 @@
         </div>
 
         <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200">
-            <h2 class="text-lg font-bold text-gray-800 mb-4">{{ $project->title }}</h2>
+            <h2 class="text-lg font-bold text-gray-800">{{ $project->title }}</h2>
+            <p class="text-sm text-gray-500 mb-4">{{ __('Evaluation stage:') }} <strong>{{ $stageName }}</strong></p>
             
             <form action="{{ route('evaluations.coordinator.assign.store', $project) }}" method="POST">
                 @csrf
@@ -16,11 +17,18 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Select Teachers') }}</label>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto p-2 border border-gray-200 rounded-md">
                         @foreach($teachers as $teacher)
-                            <label class="inline-flex items-center p-2 rounded hover:bg-gray-50 cursor-pointer">
+                            <label class="inline-flex items-start p-2 rounded {{ $teacher->jury_available ? 'hover:bg-gray-50 cursor-pointer' : 'bg-gray-50 opacity-70 cursor-not-allowed' }}">
                                 <input type="checkbox" name="teachers[]" value="{{ $teacher->id }}" 
-                                    class="rounded border-gray-300 text-upta-600 shadow-sm focus:ring-upta-500"
-                                    {{ in_array($teacher->id, old('teachers', $assignedTeacherIds)) ? 'checked' : '' }}>
-                                <span class="ml-2 text-sm text-gray-700">{{ $teacher->name }}</span>
+                                    class="mt-0.5 rounded border-gray-300 text-upta-600 shadow-sm focus:ring-upta-500"
+                                    {{ in_array($teacher->id, old('teachers', $assignedTeacherIds)) ? 'checked' : '' }}
+                                    {{ $teacher->jury_available ? '' : 'disabled' }}>
+                                <span class="ml-2 text-sm text-gray-700">
+                                    <span class="block font-medium">{{ $teacher->name }}</span>
+                                    <span class="block text-xs text-gray-500">{{ $teacher->specialty ?: __('Especialidad no registrada') }}</span>
+                                    <span class="block text-xs {{ $teacher->jury_available ? 'text-green-700' : 'text-red-700' }}">
+                                        {{ $teacher->jury_available ? ($teacher->availability ?: __('Disponible para jurado')) : __('No disponible para jurado') }}
+                                    </span>
+                                </span>
                             </label>
                         @endforeach
                     </div>

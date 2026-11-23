@@ -12,12 +12,9 @@
                 </p>
             </div>
             
-            <form action="{{ route('tutors.increaseCapacity') }}" method="POST">
-                @csrf
-                <button type="submit" class="bg-upta-50 text-upta-700 border border-upta-200 px-4 py-2 rounded-md text-sm font-semibold hover:bg-upta-100 transition">
-                    {{ __('Increase My Capacity') }}
-                </button>
-            </form>
+            <span class="text-xs text-gray-500">
+                {{ __('Your tutoring capacity is managed by the coordination.') }}
+            </span>
         </div>
 
         <!-- ========================================== -->
@@ -61,6 +58,9 @@
                     <p class="text-gray-500">{{ __('You have no pending tutoring requests.') }}</p>
                 </div>
             @endforelse
+            @if($requests->hasPages())
+                <div class="mt-4">{{ $requests->links() }}</div>
+            @endif
         </div>
 
         <!-- ========================================== -->

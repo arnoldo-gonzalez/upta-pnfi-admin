@@ -130,7 +130,8 @@ class RoleAndUserSeeder extends Seeder
                     'password' => Hash::make('password'),
                     'credential' => 3000000 + $i,
                     'phone' => '0' . (4140000004 + $i),
-                    'status_id' => UserStatus::PENDING->value,
+                    // Al menos un estudiante activo para poder probar el flujo completo.
+                    'status_id' => $i === 0 ? UserStatus::ACTIVE->value : UserStatus::PENDING->value,
                 ]
             );
             $estudiante->assignRole($estudianteRole);

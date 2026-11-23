@@ -14,12 +14,25 @@ class AcademicActivity extends Model
         return $this->belongsTo(AcademicTerm::class); 
     }
 
-    // Helper para validar si una actividad está abierta
+    // Helper para validar si una actividad está abierta.
+    // Se busca la ventana vigente (varias pueden existir, una por trimestre) y
+    // se incluye el día completo de cierre.
     public static function isOpen($type)
     {
-        $activity = self::where('type', $type)->first();
-        if (!$activity) return false; // Si no se ha configurado, está cerrada por defecto
-        
-        return now()->between($activity->start_date, $activity->end_date);
+        $activity = self::query()
+            ->where('type', $type)
+            ->whereDate('start_date', '<=', now()->toDateString())
+            ->whereDate('end_date', '>=', now()->toDateString())
+            ->latest('start_date')
+            ->first();
+
+        if (! $activity) {
+            return false; // Sin ventana vigente, cerrada por defecto.
+        }
+
+        return now()->betweenIncluded(
+            $activity->start_date->copy()->startOfDay(),
+            $activity->end_date->copy()->endOfDay()
+        );
     }
 }

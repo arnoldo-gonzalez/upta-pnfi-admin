@@ -28,7 +28,10 @@
 
                         <!-- Evaluaciones de este envío -->
                         @php
-                            $evals = \App\Models\ProjectEvaluation::where('project_document_id', $doc->id)->with('teacher')->get();
+                            $evals = \App\Models\ProjectEvaluation::where('project_document_id', $doc->id)
+                                ->when(! $canSeeAll, fn ($query) => $query->where('user_id', auth()->id()))
+                                ->with('teacher')
+                                ->get();
                         @endphp
                         
                         @if($evals->count() > 0)

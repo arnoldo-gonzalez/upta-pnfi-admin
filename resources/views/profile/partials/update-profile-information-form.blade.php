@@ -47,6 +47,34 @@
             @endif
         </div>
 
+        <div>
+            <x-input-label for="current_password" :value="__('Current Password (only to change your email)')" />
+            <x-text-input id="current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
+            <x-input-error class="mt-2" :messages="$errors->get('current_password')" />
+        </div>
+
+        <div class="border-t border-gray-200 pt-4">
+            <h3 class="text-sm font-semibold text-gray-800">{{ __('Pregunta de seguridad') }}</h3>
+            <p class="text-xs text-gray-500 mt-1">{{ __('Se usa para recuperar tu contraseña sin depender del correo.') }}</p>
+
+            <div class="mt-3">
+                <x-input-label for="security_question" :value="__('Pregunta')" />
+                <x-text-input id="security_question" name="security_question" type="text" class="mt-1 block w-full"
+                    :value="old('security_question', $user->security_question)"
+                    placeholder="{{ __('Ej: ¿Cuál es el nombre de tu primera mascota?') }}" />
+                <x-input-error class="mt-2" :messages="$errors->get('security_question')" />
+            </div>
+
+            <div class="mt-3">
+                <x-input-label for="security_answer" :value="__('Respuesta')" />
+                <x-text-input id="security_answer" name="security_answer" type="password" class="mt-1 block w-full" autocomplete="off" />
+                <x-input-error class="mt-2" :messages="$errors->get('security_answer')" />
+                @if ($user->security_answer)
+                    <p class="text-xs text-green-600 mt-1">{{ __('Ya tienes una respuesta configurada. Déjala en blanco para conservarla.') }}</p>
+                @endif
+            </div>
+        </div>
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

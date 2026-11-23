@@ -189,7 +189,13 @@
 
                     <!-- 1. FORMULARIO DE SUBIDA Y ALERTAS -->
                     @if($project->status_id === UserStatus::DRAFT->value || $project->status_id === UserStatus::NEEDS_CORRECTIONS->value)
-                        
+
+                        <div class="flex justify-end mb-4">
+                            <a href="{{ route('projects.edit', $project) }}" class="text-sm font-semibold text-upta-600 hover:text-upta-800">
+                                {{ __('Editar datos del proyecto') }}
+                            </a>
+                        </div>
+
                         @if($canSubmitProtocol)
                             <!-- ALERTA DE OBSERVACIONES -->
                             @if($project->status_id === UserStatus::NEEDS_CORRECTIONS->value)

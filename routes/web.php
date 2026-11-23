@@ -4,6 +4,7 @@ use App\Http\Controllers\AcademicCalendarController;
 use App\Http\Controllers\AdminProtocolTemplateController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\LateSubmissionController;
 use App\Http\Controllers\NotificationController;
@@ -14,19 +15,17 @@ use App\Http\Controllers\ProjectDocumentController;
 use App\Http\Controllers\ProjectInvitationController;
 use App\Http\Controllers\ProtocolPreviewController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\TutorController;
 use App\Http\Controllers\TutorEvaluationController;
 use App\Http\Controllers\TutorLogController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return auth()->check() 
-        ? redirect()->route('dashboard') 
-        : redirect()->route('login');
-});
+Route::get('/', HomeController::class)->name('home');
 
 Route::middleware(['auth', 'can:generate-reports'])->group(function () {
     // Una sola ruta para todos los reportes
@@ -36,10 +35,16 @@ Route::middleware(['auth', 'can:generate-reports'])->group(function () {
 Route::middleware(['auth'/* , 'verified' */])->group(function () {
 
     Route::get('/documents/{document}/download', [ProjectDocumentController::class, 'download'])->name('documents.download');
+    Route::get('/projects/{project}/protocol/download', [ProjectDocumentController::class, 'downloadRegenerated'])->name('projects.protocol.download');
+
+    // La autorización real vive en el controlador (miembro, tutor, asesor,
+    // evaluador, coordinación o admin).
+    Route::get('/tutor-logs/{log}/download', [TutorLogController::class, 'downloadLog'])->name('tutor-logs.download');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/cartelera', [EventController::class, 'cartelera'])->name('cartelera.index');
 
-    Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
 
 });
@@ -48,7 +53,6 @@ Route::middleware(['auth', 'role:admin|estudiante'])->group(function () {
 
     Route::post('/projects/{project}/late-submission', [LateSubmissionController::class, 'store'])->name('late-submission.store');
     Route::post('/projects/{project}/request-tutor', [TutorController::class, 'request'])->name('tutors.request');
-    Route::get('/tutor-logs/{log}/download', [TutorLogController::class, 'downloadLog'])->name('tutor-logs.download');
 
     Route::post('/projects/invite', [ProjectInvitationController::class, 'store'])->name('projects.invite');
     Route::post('/invitations/{invitation}/accept', [ProjectInvitationController::class, 'accept'])->name('invitations.accept');
@@ -57,6 +61,8 @@ Route::middleware(['auth', 'role:admin|estudiante'])->group(function () {
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
     Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
+    Route::get('/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
+    Route::put('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
     Route::post('/projects/{project}/submit-protocol', [ProjectController::class, 'submitProtocol'])->name('projects.submitProtocol');
     Route::post('/projects/{project}/logs', [TutorLogController::class, 'store'])->name('tutor-logs.store');
     Route::get('/my-tutor', [TutorController::class, 'studentIndex'])->name('tutors.student.index');
@@ -71,6 +77,16 @@ Route::middleware(['auth', 'role:admin|coordinador|docente'])->group(function ()
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index');
+
+    Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
+    Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
+    Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');
+    Route::get('/admin/users/{user}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/admin/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
+
+    Route::get('/admin/backups', [BackupController::class, 'index'])->name('admin.backups.index');
+    Route::post('/admin/backups', [BackupController::class, 'store'])->name('admin.backups.store');
+    Route::get('/admin/backups/{file}/download', [BackupController::class, 'download'])->name('admin.backups.download');
 });
 
 Route::middleware(['auth', 'role:admin|coordinador'])->group(function () {
@@ -98,14 +114,15 @@ Route::middleware(['auth', 'role:admin|coordinador'])->group(function () {
     Route::delete('/teachers/{teacher}', [TeacherController::class, 'destroy'])->name('teachers.destroy');
 
     Route::get('/coordinator/protocols', [ProjectController::class, 'protocols'])->name('coordinator.protocols');
-    Route::get('/projects/{project}/protocol/download', [ProjectDocumentController::class, 'downloadRegenerated'])->name('projects.protocol.download');
     Route::get('/coordinator/protocols/edit', [AdminProtocolTemplateController::class, 'show'])->name('coordinator.protocols.edit');
     Route::get('/coordinator/tutorships', [ProjectController::class, 'tutorships'])->name('coordinator.tutorships');
+    Route::get('/coordinator/projects/{project}/tutor-logs', [TutorLogController::class, 'coordinatorIndex'])->name('coordinator.tutor-logs');
     Route::get('/coordinator/assign-tutors', [TutorController::class, 'assignDashboard'])->name('coordinator.assignTutors');
     Route::post('/coordinator/assign-tutors/{project}', [TutorController::class, 'manualAssign'])->name('coordinator.manualAssign');
     Route::post('/coordinator/calculate-quota', [TutorController::class, 'calculateFairQuota'])->name('coordinator.calculateQuota');
+    Route::post('/coordinator/increase-capacity', [TutorController::class, 'increaseCapacity'])->name('tutors.increaseCapacity');
 
-    Route::resource('events', EventController::class)->except(['show', 'edit', 'update']);
+    Route::resource('events', EventController::class)->except(['show']);
 
     Route::get('/academic-calendar', [AcademicCalendarController::class, 'index'])->name('calendar.index');
     Route::post('/academic-calendar/terms', [AcademicCalendarController::class, 'storeTerm'])->name('calendar.storeTerm');
@@ -134,8 +151,6 @@ Route::middleware(['auth', 'role:estudiante'])->group(function () {
         ->name('projects.protocol.fill');
     Route::post('/projects/{project}/protocol/preview', [ProtocolPreviewController::class, 'previewProject'])
         ->name('projects.protocol.preview');
-    Route::post('/projects/{project}/protocol/submit', [ProjectController::class, 'submitProtocol'])
-        ->name('projects.protocol.submit');
 
 });
 
@@ -144,10 +159,6 @@ Route::middleware(['auth', 'role:admin|docente'])->group(function () {
     Route::get('/my-tutor-requests', [TutorController::class, 'index'])->name('tutors.index');
     Route::post('/tutor-requests/{project}/accept', [TutorController::class, 'accept'])->name('tutors.accept');
     Route::post('/tutor-requests/{project}/reject', [TutorController::class, 'reject'])->name('tutors.reject');
-    Route::post('/my-tutor-requests/increase-capacity', [TutorController::class, 'increaseCapacity'])->name('tutors.increaseCapacity');
-
-    Route::get('/my-evaluations/history', [EvaluationController::class, 'historyIndex'])->name('evaluations.teacher.history');
-    Route::get('/my-evaluations/history/{project}', [EvaluationController::class, 'historyShow'])->name('evaluations.teacher.history.show');
 
     Route::post('/evaluations/{evaluation}/field-correction', [EvaluationController::class, 'storeFieldCorrection'])->name('evaluations.teacher.field-correction');
 

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['title', 'description', 'start_date', 'event_type_id', 'visible_to_roles', 'role_links'])]
+#[Fillable(['title', 'description', 'start_date', 'location', 'project_id', 'event_type_id', 'visible_to_roles', 'role_links'])]
 class Event extends Model
 {
     use HasFactory;
@@ -19,5 +19,10 @@ class Event extends Model
     public function type()
     {
         return $this->belongsTo(EventType::class, 'event_type_id');
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
     }
 }

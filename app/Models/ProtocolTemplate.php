@@ -19,6 +19,6 @@ class ProtocolTemplate extends Model
 
     public static function active()
     {
-        return self::where('activo', true)->first();
+        return self::where('activo', true)->latest('id')->first();
     }
 }

@@ -1,9 +1,10 @@
-name: Deploy Laravel via SSH and Rsync
+name: Tests, Build and Deploy
 
 on:
   push:
     branches:
-      - master # Cambia esto por 'master' si es el nombre de tu rama principal
+      - master
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -13,42 +14,58 @@ jobs:
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      # 1. Configurar la versión de PHP necesaria para tu Laravel
-      - name: Setup PHP
+      - name: Configurar PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4' 
-          extensions: mbstring, xml, ctype, iconv, mysql, zip, bcmath
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, iconv, mysql, pgsql, sqlite3, pdo_sqlite, zip, bcmath, gd
           coverage: none
 
-      # 2. Instalar dependencias de Composer (Optimizado para producción)
-      - name: Instalar dependencias de Composer
-        run: |
-          composer install --no-ansi --no-dev --no-interaction --no-plugins --no-progress --no-scripts --optimize-autoloader
+      - name: Instalar dependencias de Composer (con dev para pruebas)
+        run: composer install --no-ansi --no-interaction --no-progress --prefer-dist --optimize-autoloader
 
-      # 3. Desplegar con Rsync y Optimizar Laravel (Flujo Limpio y Robusto)
-      - name: Desplegar y Optimizar Aplicación
+      - name: Preparar entorno de pruebas
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Ejecutar pruebas
+        run: php artisan test --compact
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Compilar assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Instalar dependencias de producción
+        run: composer install --no-ansi --no-dev --no-interaction --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Desplegar y optimizar
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          # 1. Escribir y formatear la clave de forma ultra-segura
+          set -e
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/ssh_key
           sed -i 's/\r$//' /tmp/ssh_key
           chmod 600 /tmp/ssh_key
-          
-          # 2. Iniciar el agente y añadir la clave que YA está limpia
+
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-add /tmp/ssh_key
-          
-          # 3. Registrar el servidor en known_hosts
+
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
-          
-          # 4. Asegurar de forma remota que la estructura de carpetas exista
+
           ssh -o IdentitiesOnly=yes "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" "mkdir -p ~/www/uptamcy/"
 
-          # 5. Ejecutar Rsync apuntando a ~/www/uptamcy/
+          # storage/ se conserva en el servidor para que --delete no borre los
+          # documentos subidos. public/build se compila en CI y sí se despliega.
           rsync -avz \
             -e "ssh -o IdentitiesOnly=yes" \
             --no-perms --no-owner --no-group \
@@ -58,20 +75,33 @@ jobs:
             --exclude='node_modules/' \
             --exclude='.env' \
             --exclude='.ssh/' \
-            --exclude='storage/logs/*' \
-            --exclude='storage/framework/sessions/*' \
+            --exclude='database/database.sqlite' \
+            --exclude='.phpunit.result.cache' \
+            --exclude='storage/app/' \
+            --exclude='storage/logs/' \
+            --exclude='storage/framework/' \
+            --exclude='public/storage' \
+            --exclude='public/hot' \
             . "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}":~/www/uptamcy/
 
-          # 6. Ejecutar comandos de producción en el servidor
           ssh -o IdentitiesOnly=yes "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" << 'EOF'
+            set -e
             cd ~/www/uptamcy/
-            
-            php artisan down
+
+            # Crear la estructura de storage si el servidor es nuevo.
+            mkdir -p storage/app/private storage/app/public storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
+            chmod -R ug+rwX storage || true
+
+            php artisan down || true
+            trap 'php artisan up' EXIT
+
             php artisan migrate --force
+            php artisan db:seed --class=RoleSeeder --force
+            php artisan storage:link || true
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
+
             php artisan up
+            trap - EXIT
           EOF
- 
- 

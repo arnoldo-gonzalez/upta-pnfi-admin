@@ -108,7 +108,7 @@
 
                         @if (!empty($project))
                             <button type="submit"
-                                    formaction="{{ route('projects.protocol.submit', $project) }}"
+                                    formaction="{{ route('projects.submitProtocol', $project) }}"
                                     class="bg-green-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-green-700 transition shadow-sm"
                                     onclick="return confirm('{{ __('¿Guardar y enviar el protocolo a revisión? Una vez enviado no podrá editarlo hasta que sea evaluado.') }}')">
                                 {{ __('Guardar y enviar a revisión') }}

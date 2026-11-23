@@ -241,18 +241,25 @@
                                 </div>
 
                                 <!-- Tarjeta del Tutor -->
-                                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                                    <h3 class="text-lg font-bold text-gray-800 mb-2">{{ __('My Tutor') }}</h3>
-                                    <div class="flex items-center mt-3">
-                                        <div class="h-10 w-10 rounded-full bg-upta-100 text-upta-700 flex items-center justify-center font-bold mr-3">
-                                            {{ substr($project->tutor->name, 0, 1) }}
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-900">{{ $project->tutor->name }}</p>
-                                            <p class="text-xs text-gray-500">{{ $project->tutor->email }}</p>
+                                @if($project->tutor)
+                                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                        <h3 class="text-lg font-bold text-gray-800 mb-2">{{ __('My Tutor') }}</h3>
+                                        <div class="flex items-center mt-3">
+                                            <div class="h-10 w-10 rounded-full bg-upta-100 text-upta-700 flex items-center justify-center font-bold mr-3">
+                                                {{ substr($project->tutor->name, 0, 1) }}
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-900">{{ $project->tutor->name }}</p>
+                                                <p class="text-xs text-gray-500">{{ $project->tutor->email }}</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                @else
+                                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                        <h3 class="text-lg font-bold text-gray-800 mb-2">{{ __('My Tutor') }}</h3>
+                                        <p class="text-sm text-gray-500">{{ __('Your tutor is no longer available. Please contact the coordination.') }}</p>
+                                    </div>
+                                @endif
                             @endif
                         @endif
                     </div>

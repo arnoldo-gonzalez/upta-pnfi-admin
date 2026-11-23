@@ -77,7 +77,13 @@ class ProtocolPreviewController extends Controller
 
         $validated = $request->validate($this->docxService->validationRules($template));
 
-        $tmp = $this->docxService->generate($template, $validated);
+        try {
+            $tmp = $this->docxService->generate($template, $validated);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->with('error', __('The protocol could not be generated. Please contact the administrator.'));
+        }
 
         return response()->download($tmp, 'protocolo_previsualizado.docx')
             ->deleteFileAfterSend(true);
@@ -90,6 +96,18 @@ class ProtocolPreviewController extends Controller
      */
     public function previewProject(Project $project, Request $request)
     {
+        $user = auth()->user();
+
+        $isStudentMember = $project->students()
+            ->whereHas('enrollment', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->exists();
+
+        if (! $isStudentMember) {
+            abort(403, 'No estas autorizado para previsualizar este protocolo.');
+        }
+
         $template = ProtocolTemplate::active();
 
         if (! $template) {
@@ -99,7 +117,13 @@ class ProtocolPreviewController extends Controller
 
         $validated = $request->validate($this->docxService->validationRules($template));
 
-        $tmp = $this->docxService->generate($template, $validated);
+        try {
+            $tmp = $this->docxService->generate($template, $validated);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->with('error', __('The protocol could not be generated. Please contact the administrator.'));
+        }
 
         return response()->download($tmp, 'protocolo_previsualizado.docx')
             ->deleteFileAfterSend(true);
@@ -132,7 +156,7 @@ class ProtocolPreviewController extends Controller
         // Si hay correcciones por campo (ancladas a la evaluación del docente), sobreescribimos los valores
         $corrections = \App\Models\ProjectProtocolFieldCorrection::whereHas('projectEvaluation', function ($q) use ($document) {
             $q->where('project_document_id', $document->id);
-        })->pluck('correction', 'placeholder_key')->all();
+        })->orderBy('id')->pluck('correction', 'placeholder_key')->all();
         foreach ($corrections as $key => $correction) {
             $values[$key] = $correction;
         }

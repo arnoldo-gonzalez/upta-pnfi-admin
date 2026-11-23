@@ -16,6 +16,13 @@ use Tests\TestCase;
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
+    ->beforeEach(function () {
+        // Los usuarios referencian status_id y las rutas usan roles de Spatie.
+        $this->seed([
+            \Database\Seeders\StatusSeeder::class,
+            \Database\Seeders\RoleSeeder::class,
+        ]);
+    })
     ->in('Feature');
 
 /*

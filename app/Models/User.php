@@ -13,12 +13,25 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password','credential', 'phone', 'status_id', 'max_tutored_projects'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable(['name', 'email', 'password','credential', 'phone', 'specialty', 'availability', 'jury_available', 'status_id', 'max_tutored_projects', 'security_question', 'security_answer'])]
+#[Hidden(['password', 'remember_token', 'security_answer'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasRoles;
+
+    /**
+     * Todo usuario nuevo nace pendiente de aprobación salvo que se indique
+     * otro estado explícitamente (docentes, importaciones, etc.).
+     */
+    protected $attributes = [
+        'status_id' => 1,
+    ];
+
+    public function isActive(): bool
+    {
+        return $this->status_id === \App\Enums\UserStatus::ACTIVE->value;
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -30,6 +43,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'security_answer' => 'hashed',
+            'jury_available' => 'boolean',
         ];
     }
 

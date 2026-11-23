@@ -29,13 +29,15 @@ class ProjectEvaluated extends Notification
     public function toArray(object $notifiable): array
     {
         $isApproved = $this->evaluation->status_id === UserStatus::ACTIVE->value;
+        $isProtocol = ($this->evaluation->stage?->name ?? 'Protocolo') === 'Protocolo';
+        $subject = $isProtocol ? 'Protocolo' : 'Defensa';
 
         return [
             'project_id' => $this->project->id,
-            'title' => $isApproved ? 'Protocolo Aprobado' : 'Protocolo Rechazado',
-            'message' => $isApproved 
-                ? 'Tu proyecto "' . $this->project->title . '" ha sido aprobado.' 
-                : 'Tu proyecto requiere correcciones. Revisa las observaciones.',
+            'title' => $isApproved ? $subject . ' Aprobado' : $subject . ' Rechazado',
+            'message' => $isApproved
+                ? 'Tu proyecto "' . $this->project->title . '" fue aprobado en la etapa de ' . strtolower($subject) . '.'
+                : 'Tu proyecto "' . $this->project->title . '" requiere correcciones. Revisa las observaciones.',
             'url' => route('projects.index'),
         ];
     }

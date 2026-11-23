@@ -2,37 +2,50 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\Project;
 use App\Models\ProjectDocument;
+use App\Models\ProjectEvaluation;
 use App\Models\ProtocolTemplate;
 use App\Services\ProtocolDocxService;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 class ProjectDocumentController extends Controller
 {
-    public function download(ProjectDocument $document) {
-        
+    public function download(ProjectDocument $document)
+    {
         // Si el usuario no pasa la validación de la Policy, Laravel lanzará un error 403 automáticamente.
         Gate::authorize('download', $document);
 
-        $zipPath = storage_path('app/public/' . $document->file_path);
+        $disk = Storage::disk('local');
 
-        if (!file_exists($zipPath)) {
+        // Compatibilidad con documentos antiguos guardados en el disco público.
+        if ($document->file_path && ! $disk->exists($document->file_path) && Storage::disk('public')->exists($document->file_path)) {
+            $disk = Storage::disk('public');
+        }
+
+        if (! $document->file_path || ! $disk->exists($document->file_path)) {
             abort(404, 'File not found.');
         }
 
-        $zip = new \ZipArchive;
-        if ($zip->open($zipPath) === TRUE) {
-            $fileName = $zip->getNameIndex(0);
-            $content = $zip->getFromIndex(0);
-            $zip->close();
+        $path = $disk->path($document->file_path);
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mimeType = match ($extension) {
+            'pdf' => 'application/pdf',
+            'doc' => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            default => 'application/octet-stream',
+        };
 
-            return response($content, 200)
-                ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'inline; filename="' . $fileName . '"');
-        }
+        $fileName = basename($document->file_path);
 
-        abort(500, 'Could not read the file.');
+        AuditLog::record('download_document', 'Descargó el documento de un proyecto.');
+
+        return response()->file($path, [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'inline; filename="' . $fileName . '"',
+        ]);
     }
 
     public function downloadRegenerated(Project $project)
@@ -49,9 +62,13 @@ class ProjectDocumentController extends Controller
             ->where('users.id', $user->id)
             ->exists();
 
+        $isEvaluator = ProjectEvaluation::where('project_id', $project->id)
+            ->where('user_id', $user->id)
+            ->exists();
+
         $isCoordinator = $user->hasRole(['admin', 'coordinador']);
 
-        if (! ($isMember || $isTeacher || $isCoordinator)) {
+        if (! ($isMember || $isTeacher || $isEvaluator || $isCoordinator)) {
             abort(403, 'No autorizado para descargar este protocolo.');
         }
 
@@ -66,7 +83,7 @@ class ProjectDocumentController extends Controller
             abort(404, 'No se encontro el documento del protocolo.');
         }
 
-        $template = $document->protocolTemplate;
+        $template = $document->protocolTemplate ?? ProtocolTemplate::active();
 
         if (! $template) {
             abort(404, 'No se encontro la plantilla asociada.');
@@ -78,13 +95,21 @@ class ProjectDocumentController extends Controller
         // Si hay correcciones por campo (ancladas a la evaluación del docente), sobreescribimos los valores
         $corrections = \App\Models\ProjectProtocolFieldCorrection::whereHas('projectEvaluation', function ($q) use ($document) {
             $q->where('project_document_id', $document->id);
-        })->pluck('correction', 'placeholder_key')->all();
+        })->orderBy('id')->pluck('correction', 'placeholder_key')->all();
         foreach ($corrections as $key => $correction) {
             $answers[$key] = $correction;
         }
 
-        $docxService = new ProtocolDocxService();
-        $tmp = $docxService->generate($template, $answers);
+        try {
+            $docxService = new ProtocolDocxService();
+            $tmp = $docxService->generate($template, $answers);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->with('error', __('The protocol file could not be generated. Please try again.'));
+        }
+
+        AuditLog::record('download_protocol', 'Descargó el protocolo del proyecto: ' . $project->title);
 
         return response()->download($tmp, 'protocolo.docx')
             ->deleteFileAfterSend(true);

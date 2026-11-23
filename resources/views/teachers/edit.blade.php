@@ -38,6 +38,36 @@
                         <input type="number" name="phone" value="{{ old('phone', $teacher->phone) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" required>
                         @error('phone') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
+                    <!-- Especialidad -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ __('Especialidad') }}</label>
+                        <input type="text" name="specialty" value="{{ old('specialty', $teacher->specialty) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500">
+                        @error('specialty') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <!-- Disponibilidad -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">{{ __('Disponibilidad horaria') }}</label>
+                        <input type="text" name="availability" value="{{ old('availability', $teacher->availability) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500">
+                        @error('availability') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <input type="hidden" name="jury_available" value="0">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" name="jury_available" value="1" class="rounded border-gray-300 text-upta-600 shadow-sm focus:ring-upta-500" {{ old('jury_available', $teacher->jury_available) ? 'checked' : '' }}>
+                        <span class="ml-2 text-sm text-gray-700">{{ __('Disponible para actuar como jurado') }}</span>
+                    </label>
+                </div>
+
+                <!-- Estado -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">{{ __('Status') }}</label>
+                    <select name="status_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-upta-500 focus:ring-upta-500" required>
+                        <option value="{{ \App\Enums\UserStatus::ACTIVE->value }}" {{ old('status_id', $teacher->status_id) == \App\Enums\UserStatus::ACTIVE->value ? 'selected' : '' }}>{{ __('Active') }}</option>
+                        <option value="{{ \App\Enums\UserStatus::REJECTED->value }}" {{ old('status_id', $teacher->status_id) == \App\Enums\UserStatus::REJECTED->value ? 'selected' : '' }}>{{ __('Inactive') }}</option>
+                    </select>
+                    @error('status_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- Contraseña -->

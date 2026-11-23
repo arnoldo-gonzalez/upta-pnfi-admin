@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\AuditLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,13 +27,50 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $emailChanged = $user->email !== $request->validated('email');
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // Cambiar el correo permite iniciar un reset de contraseña: exigir la clave actual.
+        if ($emailChanged) {
+            $request->validate([
+                'current_password' => ['required', 'current_password'],
+            ]);
         }
 
-        $request->user()->save();
+        $validated = $request->validated();
+        $question = $validated['security_question'] ?? null;
+        $answer = $validated['security_answer'] ?? null;
+
+        if ($question && ! $answer && ! $user->security_answer) {
+            return back()->withInput()->withErrors([
+                'security_answer' => __('Debes registrar una respuesta para la pregunta de seguridad.'),
+            ]);
+        }
+
+        if (! $question && $answer) {
+            return back()->withInput()->withErrors([
+                'security_question' => __('Debes registrar la pregunta de seguridad.'),
+            ]);
+        }
+
+        unset($validated['security_question'], $validated['security_answer']);
+
+        $user->fill($validated);
+
+        if ($question) {
+            $user->security_question = $question;
+        }
+
+        if ($answer) {
+            $user->security_answer = $answer;
+        }
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+            AuditLog::record('change_email', 'Cambió su correo electrónico.');
+        }
+
+        $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

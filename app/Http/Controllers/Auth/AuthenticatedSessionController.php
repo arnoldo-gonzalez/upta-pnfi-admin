@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\AuditLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,6 +37,10 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        if (auth()->check()) {
+            AuditLog::record('logout', 'El usuario ' . auth()->user()->name . ' cerró sesión.');
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
