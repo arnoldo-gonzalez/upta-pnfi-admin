@@ -22,7 +22,7 @@ El sistema está estructurado en cuatro procesos funcionales clave:
 ## 🛠️ Stack Tecnológico
 
 *   **Backend:** Laravel (PHP)
-*   **Base de Datos:** PostgreSQL
+*   **Base de Datos:** MySQL 8.0+
 *   **Frontend:** Tailwind CSS, JavaScript, HTML, CSS (compilado con Vite)
 *   **Control de Versiones:** Git & GitHub
 *   **Gestión de Proyecto:** Scrum (Tablero Kanban en GitHub Projects)
@@ -34,7 +34,7 @@ Asegúrate de tener instalado lo siguiente en tu entorno de desarrollo:
 *   [PHP >= 8.3](https://www.php.net/)
 *   [Composer](https://getcomposer.org/)
 *   [Node.js y NPM](https://nodejs.org/)
-*   [PostgreSQL](https://www.postgresql.org/)
+*   [MySQL 8.0+](https://dev.mysql.com/downloads/)
 *   [Git](https://git-scm.com/)
 
 ## 🚀 Instalación y Configuración Local
@@ -65,14 +65,16 @@ Sigue estos pasos para levantar el proyecto en tu máquina:
    ```
 
 5. **Configurar la Base de Datos:**
-   Abre el archivo `.env` y actualiza las credenciales de tu base de datos PostgreSQL:
+   Abre el archivo `.env` y actualiza las credenciales de tu base de datos MySQL:
    ```env
-   DB_CONNECTION=pgsql
+   DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
-   DB_PORT=5432
+   DB_PORT=3306
    DB_DATABASE=nombre_de_tu_bd
    DB_USERNAME=tu_usuario
    DB_PASSWORD=tu_contraseña
+   DB_CHARSET=utf8mb4
+   DB_COLLATION=utf8mb4_unicode_ci
    ```
 
 6. **Ejecutar las migraciones (y seeders si están disponibles):**

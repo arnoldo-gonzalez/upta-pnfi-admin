@@ -18,7 +18,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mbstring, xml, ctype, iconv, mysql, pgsql, sqlite3, pdo_sqlite, zip, bcmath, gd
+          extensions: mbstring, xml, ctype, iconv, pdo_mysql, mysqli, sqlite3, pdo_sqlite, zip, bcmath, gd
           coverage: none
 
       - name: Instalar dependencias de Composer (con dev para pruebas)
